@@ -356,7 +356,7 @@ namespace Avalonia.Markup.Xaml.UnitTests.Data
 
             public OldDataContextTest()
             {
-                Bind(BarProperty, this.GetObservable(FooProperty));
+                this.Bind(BarProperty, this.GetObservable(FooProperty));
             }
         }
 

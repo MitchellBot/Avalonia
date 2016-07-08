@@ -189,6 +189,28 @@ namespace Avalonia
         }
 
         /// <summary>
+        /// Binds a <see cref="AvaloniaProperty"/> to an observable.
+        /// </summary>
+        /// <typeparam name="T">The type of the property.</typeparam>
+        /// <param name="target">The object.</param>
+        /// <param name="property">The property.</param>
+        /// <param name="source">The observable.</param>
+        /// <param name="priority">The priority of the binding.</param>
+        /// <returns>
+        /// A disposable which can be used to terminate the binding.
+        /// </returns>
+        public static IDisposable Bind<T>(
+            this IAvaloniaObject target,
+            AvaloniaProperty<T> property,
+            IObservable<T> source,
+            BindingPriority priority = BindingPriority.LocalValue)
+        {
+            Contract.Requires<ArgumentNullException>(property != null);
+
+            return target.Bind(property, source.Select(x => (object)x), priority);
+        }
+        
+        /// <summary>
         /// Binds a property on an <see cref="IAvaloniaObject"/> to an <see cref="IBinding"/>.
         /// </summary>
         /// <param name="target">The object.</param>
