@@ -39,6 +39,32 @@ namespace Avalonia.Base.UnitTests
         }
 
         [Fact]
+        public void Resets_Value_On_UnsetValue()
+        {
+            var target = new Class1();
+            var source = new BehaviorSubject<BindingNotification>(
+                new BindingNotification("initial"));
+
+            target.Bind(Class1.Styledroperty, source);
+            source.OnNext(new BindingNotification(AvaloniaProperty.UnsetValue));
+
+            Assert.Equal("default", target.GetValue(Class1.Styledroperty));
+        }
+
+        [Fact]
+        public void Resets_Value_On_UnsetValue_Direct()
+        {
+            var target = new Class1();
+            var source = new BehaviorSubject<BindingNotification>(
+                new BindingNotification("initial"));
+
+            target.Bind(Class1.DirectProperty, source);
+            source.OnNext(new BindingNotification(AvaloniaProperty.UnsetValue));
+
+            Assert.Equal("default", target.GetValue(Class1.DirectProperty));
+        }
+
+        [Fact]
         public void Doesnt_Set_Value_When_HasValue_False()
         {
             var target = new Class1();
@@ -286,7 +312,8 @@ namespace Avalonia.Base.UnitTests
                 AvaloniaProperty.RegisterDirect<Class1, string>(
                     "Bar",
                     o => o.Direct,
-                    (o, v) => o.Direct = v);
+                    (o, v) => o.Direct = v,
+                    unsetValue: "default");
 
             string _direct = "default";
 

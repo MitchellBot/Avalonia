@@ -253,30 +253,39 @@ namespace Avalonia
         private void UpdateValue(object value, int priority)
         {
             var old = _value;
-            var coercedValue = value;
 
-            if (_validate != null && value != AvaloniaProperty.UnsetValue)
+            if (value == AvaloniaProperty.UnsetValue)
             {
-                coercedValue = _validate(value);
-            }
-
-            if ((value == null && TypeUtilities.AcceptsNull(Property.PropertyType)) ||
-                (Property.PropertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo())))
-            {
-                ValuePriority = priority;
-                _value = coercedValue;
+                _value = value;
                 _owner?.Changed(this, old, _value);
             }
             else
             {
-                Logger.Error(
-                    LogArea.Binding,
-                    _owner,
-                    "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
-                    Property,
-                    _valueType,
-                    value,
-                    value.GetType());
+                var coercedValue = value;
+
+                if (_validate != null && value != AvaloniaProperty.UnsetValue)
+                {
+                    coercedValue = _validate(value);
+                }
+
+                if ((value == null && TypeUtilities.AcceptsNull(Property.PropertyType)) ||
+                    (Property.PropertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo())))
+                {
+                    ValuePriority = priority;
+                    _value = coercedValue;
+                    _owner?.Changed(this, old, _value);
+                }
+                else
+                {
+                    Logger.Error(
+                        LogArea.Binding,
+                        _owner,
+                        "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
+                        Property,
+                        _valueType,
+                        value,
+                        value.GetType());
+                }
             }
         }
     }

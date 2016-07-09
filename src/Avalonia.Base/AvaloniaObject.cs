@@ -384,7 +384,7 @@ namespace Avalonia
                 subscription = source
                     .Select(x => TypeUtilities.CastOrDefault(x, property.PropertyType))
                     .Do(_ => { }, () => _directBindings.Remove(subscription))
-                    .Subscribe(x => SetValue(property, x));
+                    .Subscribe(x => SetDirectValue(property, x));
 
                 _directBindings.Add(subscription);
 
@@ -762,22 +762,7 @@ namespace Avalonia
         {
             if (notification.HasValue)
             {
-                if ((notification.Value == null && TypeUtilities.AcceptsNull(property.PropertyType)) ||
-                    (property.PropertyType.GetTypeInfo().IsAssignableFrom(notification.Value.GetType().GetTypeInfo())))
-                {
-                    SetValue(property, notification.Value);
-                }
-                else
-                {
-                    Logger.Error(
-                        LogArea.Binding,
-                        this,
-                        "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
-                        property,
-                        property.PropertyType,
-                        notification.Value,
-                        notification.Value.GetType());
-                }
+                SetDirectValue(property, notification.Value);
             }
 
             if (notification.ErrorType == BindingErrorType.Error)
@@ -789,6 +774,31 @@ namespace Avalonia
                     this,
                     property,
                     notification.Error.Message);
+            }
+        }
+
+        private void SetDirectValue(AvaloniaProperty property, object value)
+        {
+            if (value == AvaloniaProperty.UnsetValue)
+            {
+                var metadata = (IDirectPropertyMetadata)property.GetMetadata(GetType());
+                SetValue(property, metadata.UnsetValue);
+            }
+            else if ((value == null && TypeUtilities.AcceptsNull(property.PropertyType)) ||
+                     (property.PropertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo())))
+            {
+                SetValue(property, value);
+            }
+            else
+            {
+                Logger.Error(
+                    LogArea.Binding,
+                    this,
+                    "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
+                    property,
+                    property.PropertyType,
+                    value,
+                    value.GetType());
             }
         }
 
