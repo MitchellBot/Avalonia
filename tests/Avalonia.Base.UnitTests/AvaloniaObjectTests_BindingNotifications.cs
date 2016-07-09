@@ -21,9 +21,9 @@ namespace Avalonia.Base.UnitTests
             var source = new BehaviorSubject<BindingNotification>(
                 new BindingNotification("initial"));
 
-            target.Bind(Class1.Styledroperty, source);
+            target.Bind(Class1.StyledProperty, source);
 
-            Assert.Equal("initial", target.GetValue(Class1.Styledroperty));
+            Assert.Equal("initial", target.GetValue(Class1.StyledProperty));
         }
 
         [Fact]
@@ -45,10 +45,10 @@ namespace Avalonia.Base.UnitTests
             var source = new BehaviorSubject<BindingNotification>(
                 new BindingNotification("initial"));
 
-            target.Bind(Class1.Styledroperty, source);
+            target.Bind(Class1.StyledProperty, source);
             source.OnNext(new BindingNotification(AvaloniaProperty.UnsetValue));
 
-            Assert.Equal("default", target.GetValue(Class1.Styledroperty));
+            Assert.Equal("default", target.GetValue(Class1.StyledProperty));
         }
 
         [Fact]
@@ -71,9 +71,9 @@ namespace Avalonia.Base.UnitTests
             var source = new BehaviorSubject<BindingNotification>(
                 new BindingNotification(new Exception(), BindingErrorType.Error));
 
-            target.Bind(Class1.Styledroperty, source);
+            target.Bind(Class1.StyledProperty, source);
 
-            Assert.Equal("default", target.GetValue(Class1.Styledroperty));
+            Assert.Equal("default", target.GetValue(Class1.StyledProperty));
         }
 
         [Fact]
@@ -101,16 +101,16 @@ namespace Avalonia.Base.UnitTests
                 var source = new BehaviorSubject<BindingNotification>(
                     new BindingNotification(4));
 
-                target.Bind(Class1.Styledroperty, source);
+                target.Bind(Class1.StyledProperty, source);
 
-                Assert.Equal("default", target.GetValue(Class1.Styledroperty));
+                Assert.Equal("default", target.GetValue(Class1.StyledProperty));
 
                 sink.Verify(x => x.Log(
                     LogEventLevel.Error,
                     LogArea.Binding,
                     target,
                     "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
-                    new object[] { Class1.Styledroperty, typeof(string), 4, typeof(int) }));
+                    new object[] { Class1.StyledProperty, typeof(string), 4, typeof(int) }));
             }
         }
 
@@ -147,9 +147,9 @@ namespace Avalonia.Base.UnitTests
             var source = new BehaviorSubject<BindingNotification>(
                 new BindingNotification(new Exception(), BindingErrorType.Error, "fallback"));
 
-            target.Bind(Class1.Styledroperty, source);
+            target.Bind(Class1.StyledProperty, source);
 
-            Assert.Equal("fallback", target.GetValue(Class1.Styledroperty));
+            Assert.Equal("fallback", target.GetValue(Class1.StyledProperty));
         }
 
         [Fact]
@@ -177,16 +177,16 @@ namespace Avalonia.Base.UnitTests
                 var source = new BehaviorSubject<BindingNotification>(
                     new BindingNotification(new Exception(), BindingErrorType.Error, 5));
 
-                target.Bind(Class1.Styledroperty, source);
+                target.Bind(Class1.StyledProperty, source);
 
-                Assert.Equal("default", target.GetValue(Class1.Styledroperty));
+                Assert.Equal("default", target.GetValue(Class1.StyledProperty));
 
                 sink.Verify(x => x.Log(
                     LogEventLevel.Error,
                     LogArea.Binding,
                     target,
                     "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
-                    new object[] { Class1.Styledroperty, typeof(string), 5, typeof(int) }));
+                    new object[] { Class1.StyledProperty, typeof(string), 5, typeof(int) }));
             }
         }
 
@@ -223,9 +223,9 @@ namespace Avalonia.Base.UnitTests
             var source = new BehaviorSubject<BindingNotification>(
                 new BindingNotification(new Exception(), BindingErrorType.DataValidationError, "fallback"));
 
-            target.Bind(Class1.Styledroperty, source);
+            target.Bind(Class1.StyledProperty, source);
 
-            Assert.Equal("fallback", target.GetValue(Class1.Styledroperty));
+            Assert.Equal("fallback", target.GetValue(Class1.StyledProperty));
         }
 
         [Fact]
@@ -264,13 +264,13 @@ namespace Avalonia.Base.UnitTests
 
             using (TestLogSink.Start(checkLogMessage))
             {
-                target.Bind(Class1.Styledroperty, source);
+                target.Bind(Class1.StyledProperty, source);
                 source.OnNext(new BindingNotification("initial"));
                 source.OnNext(new BindingNotification(
                     new InvalidOperationException("Foo"), 
                     errorType));
 
-                Assert.Equal("initial", target.GetValue(Class1.Styledroperty));
+                Assert.Equal("initial", target.GetValue(Class1.StyledProperty));
                 Assert.Equal(expected, called);
             }
         }
@@ -305,7 +305,7 @@ namespace Avalonia.Base.UnitTests
 
         private class Class1 : AvaloniaObject
         {
-            public static readonly StyledProperty<string> Styledroperty =
+            public static readonly StyledProperty<string> StyledProperty =
                 AvaloniaProperty.Register<Class1, string>("Foo", "default");
 
             public static readonly DirectProperty<Class1, string> DirectProperty =
