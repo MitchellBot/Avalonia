@@ -382,7 +382,6 @@ namespace Avalonia
                 }
 
                 subscription = source
-                    .Select(x => TypeUtilities.CastOrDefault(x, property.PropertyType))
                     .Do(_ => { }, () => _directBindings.Remove(subscription))
                     .Subscribe(x => SetDirectValue(property, x));
 
@@ -448,7 +447,10 @@ namespace Avalonia
                     _directBindings = new List<IDisposable>();
                 }
 
-                subscription = source.Subscribe(x => ReceivedDirectBindingNotification(property, x));
+                subscription = source
+                    .Do(_ => { }, () => _directBindings.Remove(subscription))
+                    .Subscribe(x => ReceivedDirectBindingNotification(property, x));
+
                 _directBindings.Add(subscription);
 
                 return Disposable.Create(() =>

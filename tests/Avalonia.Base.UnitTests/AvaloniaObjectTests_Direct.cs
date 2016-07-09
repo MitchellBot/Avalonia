@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using Avalonia.Data;
 using Avalonia.Logging;
 using Avalonia.UnitTests;
+using Moq;
 using Xunit;
 
 namespace Avalonia.Base.UnitTests
@@ -177,29 +179,57 @@ namespace Avalonia.Base.UnitTests
         }
 
         [Fact]
-        public void Bind_Handles_Wrong_Type()
+        public void Bind_Ignores_And_Logs_Incorrect_Type()
         {
-            var target = new Class1();
-            var source = new Subject<object>();
+            var sink = new Mock<ILogSink>();
 
-            var sub = target.Bind(Class1.FooProperty, source);
+            Logger.Sink = sink.Object;
 
-            source.OnNext(45);
+            using (Disposable.Create(() => Logger.Sink = null))
+            {
+                var target = new Class1();
+                var source = new Subject<object>();
+                var sub = target.Bind(Class1.FooProperty, source);
 
-            Assert.Equal(null, target.Foo);
+                source.OnNext("initial");
+                source.OnNext(45);
+
+                Assert.Equal("initial", target.Foo);
+
+                sink.Verify(x => x.Log(
+                    LogEventLevel.Error,
+                    LogArea.Binding,
+                    target,
+                    "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
+                    new object[] { Class1.FooProperty, typeof(string), 45, typeof(int) }));
+            }
         }
 
         [Fact]
-        public void Bind_Handles_Wrong_Value_Type()
+        public void Bind_Ignores_And_Logs_Incorrect_Value_Type()
         {
-            var target = new Class1();
-            var source = new Subject<object>();
+            var sink = new Mock<ILogSink>();
 
-            var sub = target.Bind(Class1.BazProperty, source);
+            Logger.Sink = sink.Object;
 
-            source.OnNext("foo");
+            using (Disposable.Create(() => Logger.Sink = null))
+            {
+                var target = new Class1();
+                var source = new Subject<object>();
+                var sub = target.Bind(Class1.BazProperty, source);
 
-            Assert.Equal(0, target.Baz);
+                source.OnNext(46);
+                source.OnNext("foo");
+
+                Assert.Equal(46, target.Baz);
+
+                sink.Verify(x => x.Log(
+                    LogEventLevel.Error,
+                    LogArea.Binding,
+                    target,
+                    "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
+                    new object[] { Class1.BazProperty, typeof(int), "foo", typeof(string) }));
+            }
         }
 
         [Fact]
