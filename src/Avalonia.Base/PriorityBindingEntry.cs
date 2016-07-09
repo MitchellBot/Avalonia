@@ -21,7 +21,6 @@ namespace Avalonia
         /// <param name="index">
         /// The binding index. Later bindings should have higher indexes.
         /// </param>
-        /// <param name="validation">The validation settings for the binding.</param>
         public PriorityBindingEntry(PriorityLevel owner, int index)
         {
             _owner = owner;
@@ -67,6 +66,35 @@ namespace Avalonia
         {
             Contract.Requires<ArgumentNullException>(binding != null);
 
+            Initialize(binding);
+            _subscription = binding.Subscribe(ValueChanged, Completed);
+        }
+
+        /// <summary>
+        /// Starts listening to the binding.
+        /// </summary>
+        /// <param name="binding">The binding.</param>
+        public void Start(IObservable<BindingNotification> binding)
+        {
+            Contract.Requires<ArgumentNullException>(binding != null);
+
+            Initialize(binding);
+            _subscription = binding.Subscribe(ReceivedBindingNotification, Completed);
+        }
+
+
+        /// <summary>
+        /// Ends the binding subscription.
+        /// </summary>
+        public void Dispose()
+        {
+            _subscription?.Dispose();
+        }
+
+        private void Initialize(IObservable<object> binding)
+        {
+            Contract.Requires<ArgumentNullException>(binding != null);
+
             if (_subscription != null)
             {
                 throw new Exception("PriorityValue.Entry.Start() called more than once.");
@@ -79,37 +107,24 @@ namespace Avalonia
             {
                 Description = ((IDescription)binding).Description;
             }
-
-            _subscription = binding.Subscribe(ValueChanged, Completed);
-        }
-
-        /// <summary>
-        /// Ends the binding subscription.
-        /// </summary>
-        public void Dispose()
-        {
-            _subscription?.Dispose();
         }
 
         private void ValueChanged(object value)
         {
-            var bindingError = value as BindingError;
+            Value = value;
+            _owner.Changed(this);
+        }
 
-            if (bindingError != null)
+        private void ReceivedBindingNotification(BindingNotification notification)
+        {
+            if (notification.HasValue)
             {
-                _owner.Error(this, bindingError);
+                ValueChanged(notification.Value);
             }
 
-            var validationStatus = value as IValidationStatus;
-
-            if (validationStatus != null)
+            if (notification.ErrorType == BindingErrorType.Error)
             {
-                _owner.Validation(this, validationStatus);
-            }
-            else if (bindingError == null || bindingError.UseFallbackValue)
-            {
-                Value = bindingError == null ? value : bindingError.FallbackValue;
-                _owner.Changed(this);
+                _owner.Error(this, notification.Error);
             }
         }
 

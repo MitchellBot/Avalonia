@@ -56,22 +56,24 @@ namespace Avalonia.Markup.Data
 
                 if (accessorPlugin != null)
                 {
-                    _accessor = ExceptionValidationPlugin.Instance.Start(
-                        reference,
-                        PropertyName,
-                        accessorPlugin.Start(reference, PropertyName, SetCurrentValue),
-                        SendValidationStatus);
+                    _accessor = accessorPlugin.Start(reference, PropertyName, SetCurrentValue);
 
-                    if (_enableValidation)
-                    {
-                        foreach (var validationPlugin in ExpressionObserver.ValidationCheckers)
-                        {
-                            if (validationPlugin.Match(reference))
-                            {
-                                _accessor = validationPlugin.Start(reference, PropertyName, _accessor, SendValidationStatus);
-                            }
-                        }
-                    }
+                    ////_accessor = ExceptionValidationPlugin.Instance.Start(
+                    ////    reference,
+                    ////    PropertyName,
+                    ////    accessorPlugin.Start(reference, PropertyName, SetCurrentValue),
+                    ////    SendValidationStatus);
+
+                    ////if (_enableValidation)
+                    ////{
+                    ////    foreach (var validationPlugin in ExpressionObserver.ValidationCheckers)
+                    ////    {
+                    ////        if (validationPlugin.Match(reference))
+                    ////        {
+                    ////            _accessor = validationPlugin.Start(reference, PropertyName, _accessor, SendValidationStatus);
+                    ////        }
+                    ////    }
+                    ////}
 
                     if (_accessor != null)
                     {

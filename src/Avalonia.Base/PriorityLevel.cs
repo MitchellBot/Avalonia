@@ -120,6 +120,32 @@ namespace Avalonia
         }
 
         /// <summary>
+        /// Adds a binding.
+        /// </summary>
+        /// <param name="binding">The binding to add.</param>
+        /// <returns>A disposable used to remove the binding.</returns>
+        public IDisposable Add(IObservable<BindingNotification> binding)
+        {
+            Contract.Requires<ArgumentNullException>(binding != null);
+
+            var entry = new PriorityBindingEntry(this, _nextIndex++);
+            var node = Bindings.AddFirst(entry);
+
+            entry.Start(binding);
+
+            return Disposable.Create(() =>
+            {
+                Bindings.Remove(node);
+                entry.Dispose();
+
+                if (entry.Index >= ActiveBindingIndex)
+                {
+                    ActivateFirstBinding();
+                }
+            });
+        }
+
+        /// <summary>
         /// Invoked when an entry in <see cref="Bindings"/> changes value.
         /// </summary>
         /// <param name="entry">The entry that changed.</param>
@@ -159,21 +185,10 @@ namespace Avalonia
         /// </summary>
         /// <param name="entry">The entry that completed.</param>
         /// <param name="error">The error.</param>
-        public void Error(PriorityBindingEntry entry, BindingError error)
+        public void Error(PriorityBindingEntry entry, Exception error)
         {
             _owner.LevelError(this, error);
         }
-
-        /// <summary>
-        /// Invoked when an entry in <see cref="Bindings"/> reports validation status.
-        /// </summary>
-        /// <param name="entry">The entry that completed.</param>
-        /// <param name="validationStatus">The validation status.</param>
-        public void Validation(PriorityBindingEntry entry, IValidationStatus validationStatus)
-        {
-            _owner.LevelValidation(this, validationStatus);
-        }
-
 
         /// <summary>
         /// Activates the first binding that has a value.

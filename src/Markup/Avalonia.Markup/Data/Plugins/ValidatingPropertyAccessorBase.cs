@@ -12,15 +12,15 @@ namespace Avalonia.Markup.Data.Plugins
         protected readonly WeakReference _reference;
         protected readonly string _name;
         private readonly IPropertyAccessor _accessor;
-        private readonly Action<IValidationStatus> _callback;
+        ////private readonly Action<IValidationStatus> _callback;
 
-        protected ValidatingPropertyAccessorBase(WeakReference reference, string name, IPropertyAccessor accessor, Action<IValidationStatus> callback)
-        {
-            _reference = reference;
-            _name = name;
-            _accessor = accessor;
-            _callback = callback;
-        }
+        ////protected ValidatingPropertyAccessorBase(WeakReference reference, string name, IPropertyAccessor accessor, Action<IValidationStatus> callback)
+        ////{
+        ////    _reference = reference;
+        ////    _name = name;
+        ////    _accessor = accessor;
+        ////    _callback = callback;
+        ////}
 
         /// <inheritdoc/>
         public Type PropertyType => _accessor.PropertyType;
@@ -38,9 +38,9 @@ namespace Avalonia.Markup.Data.Plugins
         /// Sends the validation status to the callback specified in construction.
         /// </summary>
         /// <param name="status">The validation status.</param>
-        protected void SendValidationCallback(IValidationStatus status)
-        {
-            _callback?.Invoke(status);
-        }
+        ////protected void SendValidationCallback(IValidationStatus status)
+        ////{
+        ////    _callback?.Invoke(status);
+        ////}
     }
 }

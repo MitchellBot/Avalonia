@@ -13,62 +13,62 @@ namespace Avalonia.Controls.UnitTests
 {
     public class TextBoxTests_ValidationState
     {
-        [Fact]
-        public void Setter_Exceptions_Should_Set_ValidationState()
-        {
-            using (UnitTestApplication.Start(TestServices.MockThreadingInterface))
-            {
-                var target = new TextBox();
-                var binding = new Binding(nameof(ExceptionTest.LessThan10));
-                binding.Source = new ExceptionTest();
-                binding.EnableValidation = true;
-                target.Bind(TextBox.TextProperty, binding);
+        ////[Fact]
+        ////public void Setter_Exceptions_Should_Set_ValidationState()
+        ////{
+        ////    using (UnitTestApplication.Start(TestServices.MockThreadingInterface))
+        ////    {
+        ////        var target = new TextBox();
+        ////        var binding = new Binding(nameof(ExceptionTest.LessThan10));
+        ////        binding.Source = new ExceptionTest();
+        ////        binding.EnableValidation = true;
+        ////        target.Bind(TextBox.TextProperty, binding);
 
-                Assert.True(target.ValidationStatus.IsValid);
-                target.Text = "20";
-                Assert.False(target.ValidationStatus.IsValid);
-                target.Text = "1";
-                Assert.True(target.ValidationStatus.IsValid);
-            }
-        }
+        ////        Assert.True(target.ValidationStatus.IsValid);
+        ////        target.Text = "20";
+        ////        Assert.False(target.ValidationStatus.IsValid);
+        ////        target.Text = "1";
+        ////        Assert.True(target.ValidationStatus.IsValid);
+        ////    }
+        ////}
 
-        [Fact(Skip = "TODO: Not yet passing")]
-        public void Unconvertable_Value_Should_Set_ValidationState()
-        {
-            using (UnitTestApplication.Start(TestServices.MockThreadingInterface))
-            {
-                var target = new TextBox();
-                var binding = new Binding(nameof(ExceptionTest.LessThan10));
-                binding.Source = new ExceptionTest();
-                binding.EnableValidation = true;
-                target.Bind(TextBox.TextProperty, binding);
+        ////[Fact(Skip = "TODO: Not yet passing")]
+        ////public void Unconvertable_Value_Should_Set_ValidationState()
+        ////{
+        ////    using (UnitTestApplication.Start(TestServices.MockThreadingInterface))
+        ////    {
+        ////        var target = new TextBox();
+        ////        var binding = new Binding(nameof(ExceptionTest.LessThan10));
+        ////        binding.Source = new ExceptionTest();
+        ////        binding.EnableValidation = true;
+        ////        target.Bind(TextBox.TextProperty, binding);
 
-                Assert.True(target.ValidationStatus.IsValid);
-                target.Text = "foo";
-                Assert.False(target.ValidationStatus.IsValid);
-                target.Text = "1";
-                Assert.True(target.ValidationStatus.IsValid);
-            }
-        }
+        ////        Assert.True(target.ValidationStatus.IsValid);
+        ////        target.Text = "foo";
+        ////        Assert.False(target.ValidationStatus.IsValid);
+        ////        target.Text = "1";
+        ////        Assert.True(target.ValidationStatus.IsValid);
+        ////    }
+        ////}
 
-        [Fact]
-        public void Indei_Should_Set_ValidationState()
-        {
-            using (UnitTestApplication.Start(TestServices.MockThreadingInterface))
-            {
-                var target = new TextBox();
-                var binding = new Binding(nameof(ExceptionTest.LessThan10));
-                binding.Source = new IndeiTest();
-                binding.EnableValidation = true;
-                target.Bind(TextBox.TextProperty, binding);
+        ////[Fact]
+        ////public void Indei_Should_Set_ValidationState()
+        ////{
+        ////    using (UnitTestApplication.Start(TestServices.MockThreadingInterface))
+        ////    {
+        ////        var target = new TextBox();
+        ////        var binding = new Binding(nameof(ExceptionTest.LessThan10));
+        ////        binding.Source = new IndeiTest();
+        ////        binding.EnableValidation = true;
+        ////        target.Bind(TextBox.TextProperty, binding);
 
-                Assert.True(target.ValidationStatus.IsValid);
-                target.Text = "20";
-                Assert.False(target.ValidationStatus.IsValid);
-                target.Text = "1";
-                Assert.True(target.ValidationStatus.IsValid);
-            }
-        }
+        ////        Assert.True(target.ValidationStatus.IsValid);
+        ////        target.Text = "20";
+        ////        Assert.False(target.ValidationStatus.IsValid);
+        ////        target.Text = "1";
+        ////        Assert.True(target.ValidationStatus.IsValid);
+        ////    }
+        ////}
 
         private class ExceptionTest
         {

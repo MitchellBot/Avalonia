@@ -65,49 +65,49 @@ namespace Avalonia.Markup.UnitTests.Data
             }
         }
 
-        [Fact]
-        public void Setting_Non_Validating_Does_Not_Trigger_Validation()
-        {
-            var inpcAccessorPlugin = new InpcPropertyAccessorPlugin();
-            var validatorPlugin = new IndeiValidationPlugin();
-            var data = new Data();
-            var accessor = inpcAccessorPlugin.Start(new WeakReference(data), nameof(data.NonValidated), _ => { });
-            IValidationStatus status = null;
-            var validator = validatorPlugin.Start(new WeakReference(data), nameof(data.NonValidated), accessor, s => status = s);
+        ////[Fact]
+        ////public void Setting_Non_Validating_Does_Not_Trigger_Validation()
+        ////{
+        ////    var inpcAccessorPlugin = new InpcPropertyAccessorPlugin();
+        ////    var validatorPlugin = new IndeiValidationPlugin();
+        ////    var data = new Data();
+        ////    var accessor = inpcAccessorPlugin.Start(new WeakReference(data), nameof(data.NonValidated), _ => { });
+        ////    IValidationStatus status = null;
+        ////    var validator = validatorPlugin.Start(new WeakReference(data), nameof(data.NonValidated), accessor, s => status = s);
 
-            validator.SetValue(5, BindingPriority.LocalValue);
+        ////    validator.SetValue(5, BindingPriority.LocalValue);
 
-            Assert.Null(status);
-        }
+        ////    Assert.Null(status);
+        ////}
 
-        [Fact]
-        public void Setting_Validating_Property_To_Valid_Value_Returns_Successful_ValidationStatus()
-        {
-            var inpcAccessorPlugin = new InpcPropertyAccessorPlugin();
-            var validatorPlugin = new IndeiValidationPlugin();
-            var data = new Data();
-            var accessor = inpcAccessorPlugin.Start(new WeakReference(data), nameof(data.MustBePositive), _ => { });
-            IValidationStatus status = null;
-            var validator = validatorPlugin.Start(new WeakReference(data), nameof(data.MustBePositive), accessor, s => status = s);
+        ////[Fact]
+        ////public void Setting_Validating_Property_To_Valid_Value_Returns_Successful_ValidationStatus()
+        ////{
+        ////    var inpcAccessorPlugin = new InpcPropertyAccessorPlugin();
+        ////    var validatorPlugin = new IndeiValidationPlugin();
+        ////    var data = new Data();
+        ////    var accessor = inpcAccessorPlugin.Start(new WeakReference(data), nameof(data.MustBePositive), _ => { });
+        ////    IValidationStatus status = null;
+        ////    var validator = validatorPlugin.Start(new WeakReference(data), nameof(data.MustBePositive), accessor, s => status = s);
 
-            validator.SetValue(5, BindingPriority.LocalValue);
+        ////    validator.SetValue(5, BindingPriority.LocalValue);
 
-            Assert.True(status.IsValid);
-        }
+        ////    Assert.True(status.IsValid);
+        ////}
         
-        [Fact]
-        public void Setting_Validating_Property_To_Invalid_Value_Returns_Failed_ValidationStatus()
-        {
-            var inpcAccessorPlugin = new InpcPropertyAccessorPlugin();
-            var validatorPlugin = new IndeiValidationPlugin();
-            var data = new Data();
-            var accessor = inpcAccessorPlugin.Start(new WeakReference(data), nameof(data.MustBePositive), _ => { });
-            IValidationStatus status = null;
-            var validator = validatorPlugin.Start(new WeakReference(data), nameof(data.MustBePositive), accessor, s => status = s);
+        ////[Fact]
+        ////public void Setting_Validating_Property_To_Invalid_Value_Returns_Failed_ValidationStatus()
+        ////{
+        ////    var inpcAccessorPlugin = new InpcPropertyAccessorPlugin();
+        ////    var validatorPlugin = new IndeiValidationPlugin();
+        ////    var data = new Data();
+        ////    var accessor = inpcAccessorPlugin.Start(new WeakReference(data), nameof(data.MustBePositive), _ => { });
+        ////    IValidationStatus status = null;
+        ////    var validator = validatorPlugin.Start(new WeakReference(data), nameof(data.MustBePositive), accessor, s => status = s);
 
-            validator.SetValue(-5, BindingPriority.LocalValue);
+        ////    validator.SetValue(-5, BindingPriority.LocalValue);
 
-            Assert.False(status.IsValid);
-        }
+        ////    Assert.False(status.IsValid);
+        ////}
     }
 }

@@ -41,11 +41,11 @@ namespace Avalonia.Markup
                 return result;
             }
 
-            if (value != null)
-            {
-                var message = $"Could not convert '{value}' to '{targetType}'";
-                return new BindingError(new InvalidCastException(message));
-            }
+            ////if (value != null)
+            ////{
+            ////    var message = $"Could not convert '{value}' to '{targetType}'";
+            ////    return new BindingError(new InvalidCastException(message));
+            ////}
 
             return AvaloniaProperty.UnsetValue;
         }

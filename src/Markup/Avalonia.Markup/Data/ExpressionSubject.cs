@@ -126,38 +126,38 @@ namespace Avalonia.Markup.Data
                     converted = TypeUtilities.Default(type);
                     _inner.SetValue(converted, _priority);
                 }
-                else if (converted is BindingError)
-                {
-                    var error = converted as BindingError;
+                ////else if (converted is BindingError)
+                ////{
+                ////    var error = converted as BindingError;
 
-                    Logger.Error(
-                        LogArea.Binding,
-                        this,
-                        "Error binding to {Expression}: {Message}",
-                        _inner.Expression,
-                        error.Exception.Message);
+                ////    Logger.Error(
+                ////        LogArea.Binding,
+                ////        this,
+                ////        "Error binding to {Expression}: {Message}",
+                ////        _inner.Expression,
+                ////        error.Exception.Message);
 
-                    if (_fallbackValue != AvaloniaProperty.UnsetValue)
-                    {
-                        if (TypeUtilities.TryConvert(
-                            type, 
-                            _fallbackValue, 
-                            CultureInfo.InvariantCulture, 
-                            out converted))
-                        {
-                            _inner.SetValue(converted, _priority);
-                        }
-                        else
-                        {
-                            Logger.Error(
-                                LogArea.Binding,
-                                this,
-                                "Could not convert FallbackValue {FallbackValue} to {Type}",
-                                _fallbackValue,
-                                type);
-                        }
-                    }
-                }
+                ////    if (_fallbackValue != AvaloniaProperty.UnsetValue)
+                ////    {
+                ////        if (TypeUtilities.TryConvert(
+                ////            type, 
+                ////            _fallbackValue, 
+                ////            CultureInfo.InvariantCulture, 
+                ////            out converted))
+                ////        {
+                ////            _inner.SetValue(converted, _priority);
+                ////        }
+                ////        else
+                ////        {
+                ////            Logger.Error(
+                ////                LogArea.Binding,
+                ////                this,
+                ////                "Could not convert FallbackValue {FallbackValue} to {Type}",
+                ////                _fallbackValue,
+                ////                type);
+                ////        }
+                ////    }
+                ////}
                 else
                 {
                     _inner.SetValue(converted, _priority);
@@ -174,38 +174,38 @@ namespace Avalonia.Markup.Data
         private object ConvertValue(object value)
         {
             var converted = 
-                value as BindingError ??
-                value as IValidationStatus ??
+                ////value as BindingError ??
+                ////value as IValidationStatus ??
                 Converter.Convert(
                     value,
                     _targetType,
                     ConverterParameter,
                     CultureInfo.CurrentUICulture);
 
-            if (_fallbackValue != AvaloniaProperty.UnsetValue &&
-                (converted == AvaloniaProperty.UnsetValue ||
-                 converted is BindingError))
-            {
-                var error = converted as BindingError;
+            ////if (_fallbackValue != AvaloniaProperty.UnsetValue &&
+            ////    (converted == AvaloniaProperty.UnsetValue ||
+            ////     converted is BindingError))
+            ////{
+            ////    var error = converted as BindingError;
                 
-                if (TypeUtilities.TryConvert(
-                    _targetType, 
-                    _fallbackValue,
-                    CultureInfo.InvariantCulture,
-                    out converted))
-                {
-                    if (error != null)
-                    {
-                        converted = new BindingError(error.Exception, converted);
-                    }
-                }
-                else
-                {
-                    converted = new BindingError(
-                        new InvalidCastException(
-                            $"Could not convert FallbackValue '{_fallbackValue}' to '{_targetType}'"));
-                }
-            }
+            ////    if (TypeUtilities.TryConvert(
+            ////        _targetType, 
+            ////        _fallbackValue,
+            ////        CultureInfo.InvariantCulture,
+            ////        out converted))
+            ////    {
+            ////        if (error != null)
+            ////        {
+            ////            converted = new BindingError(error.Exception, converted);
+            ////        }
+            ////    }
+            ////    else
+            ////    {
+            ////        converted = new BindingError(
+            ////            new InvalidCastException(
+            ////                $"Could not convert FallbackValue '{_fallbackValue}' to '{_targetType}'"));
+            ////    }
+            ////}
 
             return converted;
         }

@@ -67,7 +67,7 @@ namespace Avalonia.Styling.UnitTests
             throw new NotImplementedException();
         }
 
-        public IDisposable Bind<T>(AvaloniaProperty<T> property, IObservable<T> source, BindingPriority priority = BindingPriority.LocalValue)
+        public IDisposable Bind(AvaloniaProperty property, IObservable<BindingNotification> source, BindingPriority priority = BindingPriority.LocalValue)
         {
             throw new NotImplementedException();
         }

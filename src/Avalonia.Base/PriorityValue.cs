@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Avalonia.Data;
 using Avalonia.Logging;
@@ -77,13 +78,26 @@ namespace Avalonia
         /// </summary>
         /// <param name="binding">The binding.</param>
         /// <param name="priority">The binding priority.</param>
-        /// <param name="validation">Validation settings for the binding.</param>
         /// <returns>
         /// A disposable that will remove the binding.
         /// </returns>
         public IDisposable Add(IObservable<object> binding, int priority)
         {
             return GetLevel(priority).Add(binding);
+        }
+
+        /// <summary>
+        /// Adds a new binding.
+        /// </summary>
+        /// <param name="binding">The binding.</param>
+        /// <param name="priority">The binding priority.</param>
+        /// <returns>
+        /// A disposable that will remove the binding.
+        /// </returns>
+        public IDisposable Add(IObservable<BindingNotification> binding, int priority)
+        {
+            var level = GetLevel(priority);
+            return level.Add(binding);
         }
 
         /// <summary>
@@ -180,21 +194,11 @@ namespace Avalonia
         }
 
         /// <summary>
-        /// Called whenever a priority level validation state changes.
-        /// </summary>
-        /// <param name="priorityLevel">The priority level of the changed entry.</param>
-        /// <param name="validationStatus">The validation status.</param>
-        public void LevelValidation(PriorityLevel priorityLevel, IValidationStatus validationStatus)
-        {
-            _owner.DataValidationChanged(this, validationStatus);
-        }
-
-        /// <summary>
         /// Called when a priority level encounters an error.
         /// </summary>
         /// <param name="level">The priority level of the changed entry.</param>
         /// <param name="error">The binding error.</param>
-        public void LevelError(PriorityLevel level, BindingError error)
+        public void LevelError(PriorityLevel level, Exception error)
         {
             Logger.Log(
                 LogEventLevel.Error,
@@ -203,7 +207,7 @@ namespace Avalonia
                 "Error binding to {Target}.{Property}: {Message}",
                 _owner,
                 Property,
-                error.Exception.Message);
+                error.Message);
         }
 
         /// <summary>
@@ -248,29 +252,29 @@ namespace Avalonia
         /// <param name="priority">The priority level that the value came from.</param>
         private void UpdateValue(object value, int priority)
         {
-            object castValue;
+            var old = _value;
+            var coercedValue = value;
 
-            if (TypeUtilities.TryCast(_valueType, value, out castValue))
+            if (_validate != null && value != AvaloniaProperty.UnsetValue)
             {
-                var old = _value;
+                coercedValue = _validate(value);
+            }
 
-                if (_validate != null && castValue != AvaloniaProperty.UnsetValue)
-                {
-                    castValue = _validate(castValue);
-                }
-
+            if ((value == null && TypeUtilities.AcceptsNull(Property.PropertyType)) ||
+                (Property.PropertyType.GetTypeInfo().IsAssignableFrom(value.GetType().GetTypeInfo())))
+            {
                 ValuePriority = priority;
-                _value = castValue;
+                _value = coercedValue;
                 _owner?.Changed(this, old, _value);
             }
             else
             {
                 Logger.Error(
-                    LogArea.Binding, 
+                    LogArea.Binding,
                     _owner,
                     "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
-                    Property.Name, 
-                    _valueType, 
+                    Property,
+                    _valueType,
                     value,
                     value.GetType());
             }

@@ -52,12 +52,12 @@ namespace Avalonia.Markup.Data.Plugins
             {
                 return new Accessor(new WeakReference<AvaloniaObject>(o), p, changed);
             }
-            else if (instance != AvaloniaProperty.UnsetValue)
-            {
-                var message = $"Could not find AvaloniaProperty '{propertyName}' on '{instance}'";
-                var exception = new MissingMemberException(message);
-                return new PropertyError(new BindingError(exception));
-            }
+            ////else if (instance != AvaloniaProperty.UnsetValue)
+            ////{
+            ////    var message = $"Could not find AvaloniaProperty '{propertyName}' on '{instance}'";
+            ////    var exception = new MissingMemberException(message);
+            ////    return new PropertyError(new BindingError(exception));
+            ////}
             else
             {
                 return null;

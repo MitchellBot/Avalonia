@@ -18,34 +18,34 @@ namespace Avalonia.Markup.Data.Plugins
         public bool Match(WeakReference reference) => true;
 
         /// <inheritdoc/>
-        public IPropertyAccessor Start(WeakReference reference, string name, IPropertyAccessor accessor, Action<IValidationStatus> callback)
-        {
-            return new ExceptionValidationChecker(reference, name, accessor, callback);
-        }
+        ////public IPropertyAccessor Start(WeakReference reference, string name, IPropertyAccessor accessor, Action<IValidationStatus> callback)
+        ////{
+        ////    return new ExceptionValidationChecker(reference, name, accessor, callback);
+        ////}
 
         private class ExceptionValidationChecker : ValidatingPropertyAccessorBase
         {
-            public ExceptionValidationChecker(WeakReference reference, string name, IPropertyAccessor accessor, Action<IValidationStatus> callback)
-                : base(reference, name, accessor, callback)
-            {
-            }
+            ////public ExceptionValidationChecker(WeakReference reference, string name, IPropertyAccessor accessor, Action<IValidationStatus> callback)
+            ////    : base(reference, name, accessor, callback)
+            ////{
+            ////}
 
             public override bool SetValue(object value, BindingPriority priority)
             {
-                try
-                {
-                    var success = base.SetValue(value, priority);
-                    SendValidationCallback(new ExceptionValidationStatus(null));
-                    return success;
-                }
-                catch (TargetInvocationException ex)
-                {
-                    SendValidationCallback(new ExceptionValidationStatus(ex.InnerException));
-                }
-                catch (Exception ex)
-                {
-                    SendValidationCallback(new ExceptionValidationStatus(ex));
-                }
+                ////try
+                ////{
+                ////    var success = base.SetValue(value, priority);
+                ////    SendValidationCallback(new ExceptionValidationStatus(null));
+                ////    return success;
+                ////}
+                ////catch (TargetInvocationException ex)
+                ////{
+                ////    SendValidationCallback(new ExceptionValidationStatus(ex.InnerException));
+                ////}
+                ////catch (Exception ex)
+                ////{
+                ////    SendValidationCallback(new ExceptionValidationStatus(ex));
+                ////}
                 return false;
             }
         }
@@ -53,20 +53,20 @@ namespace Avalonia.Markup.Data.Plugins
         /// <summary>
         /// Describes the current validation status after setting a property value.
         /// </summary>
-        public class ExceptionValidationStatus : IValidationStatus
-        {
-            internal ExceptionValidationStatus(Exception exception)
-            {
-                Exception = exception;
-            }
+        ////public class ExceptionValidationStatus : IValidationStatus
+        ////{
+        ////    internal ExceptionValidationStatus(Exception exception)
+        ////    {
+        ////        Exception = exception;
+        ////    }
 
-            /// <summary>
-            /// The thrown exception. If there was no thrown exception, null.
-            /// </summary>
-            public Exception Exception { get; }
+        ////    /// <summary>
+        ////    /// The thrown exception. If there was no thrown exception, null.
+        ////    /// </summary>
+        ////    public Exception Exception { get; }
             
-            /// <inheritdoc/>
-            public bool IsValid => Exception == null;
-        }
+        ////    /// <inheritdoc/>
+        ////    public bool IsValid => Exception == null;
+        ////}
     }
 }

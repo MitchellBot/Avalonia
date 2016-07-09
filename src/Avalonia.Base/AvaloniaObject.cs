@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reflection;
 using Avalonia.Data;
 using Avalonia.Diagnostics;
 using Avalonia.Logging;
@@ -49,29 +50,6 @@ namespace Avalonia
         /// Event handler for <see cref="PropertyChanged"/> implementation.
         /// </summary>
         private EventHandler<AvaloniaPropertyChangedEventArgs> _propertyChanged;
-
-        /// <summary>
-        /// Defines the <see cref="ValidationStatus"/> property.
-        /// </summary>
-        public static readonly DirectProperty<AvaloniaObject, ObjectValidationStatus> ValidationStatusProperty =
-            AvaloniaProperty.RegisterDirect<AvaloniaObject, ObjectValidationStatus>(nameof(ValidationStatus), c => c.ValidationStatus);
-
-        private ObjectValidationStatus validationStatus;
-
-        /// <summary>
-        /// The current validation status of the control.
-        /// </summary>
-        public ObjectValidationStatus ValidationStatus
-        {
-            get
-            {
-                return validationStatus;
-            }
-            private set
-            {
-                SetAndRaise(ValidationStatusProperty, ref validationStatus, value);
-            }
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AvaloniaObject"/> class.
@@ -324,7 +302,6 @@ namespace Avalonia
             }
             else
             {
-                PriorityValue v;
                 var originalValue = value;
 
                 if (!AvaloniaPropertyRegistry.Instance.IsRegistered(this, property))
@@ -341,17 +318,7 @@ namespace Avalonia
                         originalValue?.GetType().FullName ?? "(null)"));
                 }
 
-                if (!_values.TryGetValue(property, out v))
-                {
-                    if (value == AvaloniaProperty.UnsetValue)
-                    {
-                        return;
-                    }
-
-                    v = CreatePriorityValue(property);
-                    _values.Add(property, v);
-                }
-
+                var v = GetOrCreatePriorityValue(property);
                 LogPropertySet(property, value, priority);
                 v.SetValue(value, (int)priority);
             }
@@ -389,6 +356,8 @@ namespace Avalonia
             BindingPriority priority = BindingPriority.LocalValue)
         {
             Contract.Requires<ArgumentNullException>(property != null);
+            Contract.Requires<ArgumentNullException>(source != null);
+
             VerifyAccess();
 
             if (property.IsDirect)
@@ -406,7 +375,6 @@ namespace Avalonia
                     GetDescription(source));
 
                 IDisposable subscription = null;
-                IDisposable validationSubcription = null;
 
                 if (_directBindings == null)
                 {
@@ -414,37 +382,21 @@ namespace Avalonia
                 }
 
                 subscription = source
-                    .Where(x =>  !(x is IValidationStatus))
-                    .Select(x => CastOrDefault(x, property.PropertyType))
+                    .Select(x => TypeUtilities.CastOrDefault(x, property.PropertyType))
                     .Do(_ => { }, () => _directBindings.Remove(subscription))
-                    .Subscribe(x => DirectBindingSet(property, x));
-                validationSubcription = source
-                    .OfType<IValidationStatus>()
-                    .Subscribe(x => DataValidationChanged(property, x));
+                    .Subscribe(x => SetValue(property, x));
 
                 _directBindings.Add(subscription);
 
                 return Disposable.Create(() =>
                 {
-                    validationSubcription.Dispose();
                     subscription.Dispose();
                     _directBindings.Remove(subscription);
                 });
             }
             else
             {
-                PriorityValue v;
-
-                if (!AvaloniaPropertyRegistry.Instance.IsRegistered(this, property))
-                {
-                    ThrowNotRegistered(property);
-                }
-
-                if (!_values.TryGetValue(property, out v))
-                {
-                    v = CreatePriorityValue(property);
-                    _values.Add(property, v);
-                }
+                var v = GetOrCreatePriorityValue(property);
 
                 Logger.Verbose(
                     LogArea.Property,
@@ -454,6 +406,60 @@ namespace Avalonia
                     GetDescription(source),
                     priority);
 
+                return v.Add(source, (int)priority);
+            }
+        }
+
+        /// <summary>
+        /// Binds a <see cref="AvaloniaProperty"/> to an observable.
+        /// </summary>
+        /// <param name="property">The property.</param>
+        /// <param name="source">The observable.</param>
+        /// <param name="priority">The priority of the binding.</param>
+        /// <returns>
+        /// A disposable which can be used to terminate the binding.
+        /// </returns>
+        public IDisposable Bind(
+            AvaloniaProperty property,
+            IObservable<BindingNotification> source,
+            BindingPriority priority = BindingPriority.LocalValue)
+        {
+            Contract.Requires<ArgumentNullException>(property != null);
+            Contract.Requires<ArgumentNullException>(source != null);
+
+            if (property.IsDirect)
+            {
+                if (property.IsReadOnly)
+                {
+                    throw new ArgumentException($"The property {property.Name} is readonly.");
+                }
+
+                Logger.Verbose(
+                    LogArea.Property,
+                    this,
+                    "Bound {Property} to {Binding} with priority LocalValue",
+                    property,
+                    GetDescription(source));
+
+                IDisposable subscription = null;
+
+                if (_directBindings == null)
+                {
+                    _directBindings = new List<IDisposable>();
+                }
+
+                subscription = source.Subscribe(x => ReceivedDirectBindingNotification(property, x));
+                _directBindings.Add(subscription);
+
+                return Disposable.Create(() =>
+                {
+                    subscription.Dispose();
+                    _directBindings.Remove(subscription);
+                });
+            }
+            else
+            {
+                var v = GetOrCreatePriorityValue(property);
                 return v.Add(source, (int)priority);
             }
         }
@@ -499,31 +505,6 @@ namespace Avalonia
                     newValue,
                     priority);
             }
-        }
-
-        /// <inheritdoc/>
-        void IPriorityValueOwner.DataValidationChanged(PriorityValue sender, IValidationStatus status)
-        {
-            var property = sender.Property;
-            DataValidationChanged(property, status);
-        }
-
-        /// <summary>
-        /// Called when the validation state on a tracked property is changed.
-        /// </summary>
-        /// <param name="property">The property whose validation state changed.</param>
-        /// <param name="status">The new validation state.</param>
-        protected virtual void DataValidationChanged(AvaloniaProperty property, IValidationStatus status)
-        {
-        }
-
-        /// <summary>
-        /// Updates the validation status of the current object.
-        /// </summary>
-        /// <param name="status">The new validation status.</param>
-        protected void UpdateValidationState(IValidationStatus status)
-        {
-            ValidationStatus = ValidationStatus.UpdateValidationStatus(status);
         }
 
         /// <inheritdoc/>
@@ -637,27 +618,6 @@ namespace Avalonia
         }
 
         /// <summary>
-        /// Tries to cast a value to a type, taking into account that the value may be a
-        /// <see cref="BindingError"/>.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <param name="type">The type.</param>
-        /// <returns>The cast value, or a <see cref="BindingError"/>.</returns>
-        private static object CastOrDefault(object value, Type type)
-        {
-            var error = value as BindingError;
-
-            if (error == null)
-            {
-                return TypeUtilities.CastOrDefault(value, type);
-            }
-            else
-            {
-                return error;
-            }
-        }
-
-        /// <summary>
         /// Creates a <see cref="PriorityValue"/> for a <see cref="AvaloniaProperty"/>.
         /// </summary>
         /// <param name="property">The property.</param>
@@ -679,37 +639,6 @@ namespace Avalonia
                 validate2);
 
             return result;
-        }
-
-        /// <summary>
-        /// Sets a property value for a direct property binding.
-        /// </summary>
-        /// <param name="property">The property.</param>
-        /// <param name="value">The value.</param>
-        /// <returns></returns>
-        private void DirectBindingSet(AvaloniaProperty property, object value)
-        {
-            var error = value as BindingError;
-
-            if (error == null)
-            {
-                SetValue(property, value);
-            }
-            else
-            {
-                if (error.UseFallbackValue)
-                {
-                    SetValue(property, error.FallbackValue);
-                }
-
-                Logger.Error(
-                    LogArea.Binding,
-                    this,
-                    "Error binding to {Target}.{Property}: {Message}",
-                    this,
-                    property,
-                    error.Exception.Message);
-            }
         }
 
         /// <summary>
@@ -740,6 +669,29 @@ namespace Avalonia
             {
                 return ((IStyledPropertyAccessor)property).GetDefaultValue(GetType());
             }
+        }
+
+        /// <summary>
+        /// Gets or creates a <see cref="PriorityValue"/> for a <see cref="AvaloniaProperty"/>.
+        /// </summary>
+        /// <param name="property">The property.</param>
+        /// <returns>The <see cref="PriorityValue"/>.</returns>
+        private PriorityValue GetOrCreatePriorityValue(AvaloniaProperty property)
+        {
+            PriorityValue v;
+
+            if (!AvaloniaPropertyRegistry.Instance.IsRegistered(this, property))
+            {
+                ThrowNotRegistered(property);
+            }
+
+            if (!_values.TryGetValue(property, out v))
+            {
+                v = CreatePriorityValue(property);
+                _values.Add(property, v);
+            }
+
+            return v;
         }
 
         /// <summary>
@@ -801,6 +753,42 @@ namespace Avalonia
             if (e.Property.Inherits && !IsSet(e.Property))
             {
                 RaisePropertyChanged(e.Property, e.OldValue, e.NewValue, BindingPriority.LocalValue);
+            }
+        }
+
+        private void ReceivedDirectBindingNotification(
+            AvaloniaProperty property,
+            BindingNotification notification)
+        {
+            if (notification.HasValue)
+            {
+                if ((notification.Value == null && TypeUtilities.AcceptsNull(property.PropertyType)) ||
+                    (property.PropertyType.GetTypeInfo().IsAssignableFrom(notification.Value.GetType().GetTypeInfo())))
+                {
+                    SetValue(property, notification.Value);
+                }
+                else
+                {
+                    Logger.Error(
+                        LogArea.Binding,
+                        this,
+                        "Binding produced invalid value for {$Property} ({$PropertyType}): {$Value} ({$ValueType})",
+                        property,
+                        property.PropertyType,
+                        notification.Value,
+                        notification.Value.GetType());
+                }
+            }
+
+            if (notification.ErrorType == BindingErrorType.Error)
+            {
+                Logger.Error(
+                    LogArea.Binding,
+                    this,
+                    "Error binding to {Target}.{Property}: {Message}",
+                    this,
+                    property,
+                    notification.Error.Message);
             }
         }
 

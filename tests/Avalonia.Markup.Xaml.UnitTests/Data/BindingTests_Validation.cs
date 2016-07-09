@@ -8,45 +8,44 @@ namespace Avalonia.Markup.Xaml.UnitTests.Data
 {
     public class BindingTests_Validation
     {
-        [Fact]
-        public void Disabled_Validation_Should_Trigger_Validation_Change_On_Exception()
-        {
-            var source = new ValidationTestModel { MustBePositive = 5 };
-            var target = new TestControl { DataContext = source };
-            var binding = new Binding
-            {
-                Path = nameof(source.MustBePositive),
-                Mode = BindingMode.TwoWay,
+        ////[Fact]
+        ////public void Disabled_Validation_Should_Trigger_Validation_Change_On_Exception()
+        ////{
+        ////    var source = new ValidationTestModel { MustBePositive = 5 };
+        ////    var target = new TestControl { DataContext = source };
+        ////    var binding = new Binding
+        ////    {
+        ////        Path = nameof(source.MustBePositive),
+        ////        Mode = BindingMode.TwoWay,
 
-                // Even though EnableValidation = false, exception validation is enabled.
-                EnableValidation = false,
-            };
+        ////        // Even though EnableValidation = false, exception validation is enabled.
+        ////        EnableValidation = false,
+        ////    };
 
-            target.Bind(TestControl.ValidationTestProperty, binding);
+        ////    target.Bind(TestControl.ValidationTestProperty, binding);
 
-            target.ValidationTest = -5;
+        ////    target.ValidationTest = -5;
 
-            Assert.False(target.ValidationStatus.IsValid);
-        }
+        ////    Assert.False(target.ValidationStatus.IsValid);
+        ////}
 
-        [Fact]
-        public void Enabled_Validation_Should_Trigger_Validation_Change_On_Exception()
-        {
-            var source = new ValidationTestModel { MustBePositive = 5 };
-            var target = new TestControl { DataContext = source };
-            var binding = new Binding
-            {
-                Path = nameof(source.MustBePositive),
-                Mode = BindingMode.TwoWay,
-                EnableValidation = true,
-            };
+        ////[Fact]
+        ////public void Enabled_Validation_Should_Trigger_Validation_Change_On_Exception()
+        ////{
+        ////    var source = new ValidationTestModel { MustBePositive = 5 };
+        ////    var target = new TestControl { DataContext = source };
+        ////    var binding = new Binding
+        ////    {
+        ////        Path = nameof(source.MustBePositive),
+        ////        Mode = BindingMode.TwoWay,
+        ////        EnableValidation = true,
+        ////    };
 
-            target.Bind(TestControl.ValidationTestProperty, binding);
+        ////    target.Bind(TestControl.ValidationTestProperty, binding);
 
-            target.ValidationTest = -5;
-            Assert.False(target.ValidationStatus.IsValid);
-        }
-
+        ////    target.ValidationTest = -5;
+        ////    Assert.False(target.ValidationStatus.IsValid);
+        ////}
 
         [Fact]
         public void Passed_Validation_Should_Not_Add_Invalid_Pseudo_Class()
@@ -123,13 +122,13 @@ namespace Avalonia.Markup.Xaml.UnitTests.Data
                 }
             }
 
-            protected override void DataValidationChanged(AvaloniaProperty property, IValidationStatus status)
-            {
-                if (property == ValidationTestProperty)
-                {
-                    UpdateValidationState(status);
-                }
-            }
+            ////protected override void DataValidationChanged(AvaloniaProperty property, IValidationStatus status)
+            ////{
+            ////    if (property == ValidationTestProperty)
+            ////    {
+            ////        UpdateValidationState(status);
+            ////    }
+            ////}
         }
         
         private class ValidationTestModel

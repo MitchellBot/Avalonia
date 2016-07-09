@@ -57,12 +57,13 @@ namespace Avalonia.Markup.Data.Plugins
             {
                 return new Accessor(reference, p, changed);
             }
-            else
-            {
-                var message = $"Could not find CLR property '{propertyName}' on '{instance}'";
-                var exception = new MissingMemberException(message);
-                return new PropertyError(new BindingError(exception));
-            }
+            ////else
+            ////{
+            ////    var message = $"Could not find CLR property '{propertyName}' on '{instance}'";
+            ////    var exception = new MissingMemberException(message);
+            ////    return new PropertyError(new BindingError(exception));
+            ////}
+            return null;
         }
 
         private class Accessor : IPropertyAccessor, IWeakSubscriber<PropertyChangedEventArgs>
