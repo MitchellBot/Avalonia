@@ -18,6 +18,12 @@ namespace Avalonia.Base.UnitTests
                 typeof(PriorityValueTests), 
                 new StyledPropertyMetadata<string>());
 
+        private static readonly AvaloniaProperty TestIntProperty =
+            new StyledProperty<int>(
+                "Test",
+                typeof(PriorityValueTests),
+                new StyledPropertyMetadata<int>());
+
         [Fact]
         public void Initial_Value_Should_Be_UnsetValue()
         {
@@ -254,7 +260,7 @@ namespace Avalonia.Base.UnitTests
         [Fact]
         public void Direct_Value_Should_Be_Coerced()
         {
-            var target = new PriorityValue(null, TestProperty, typeof(int), x => Math.Min((int)x, 10));
+            var target = new PriorityValue(null, TestIntProperty, typeof(int), x => Math.Min((int)x, 10));
 
             target.SetValue(5, 0);
             Assert.Equal(5, target.Value);
@@ -265,7 +271,7 @@ namespace Avalonia.Base.UnitTests
         [Fact]
         public void Bound_Value_Should_Be_Coerced()
         {
-            var target = new PriorityValue(null, TestProperty, typeof(int), x => Math.Min((int)x, 10));
+            var target = new PriorityValue(null, TestIntProperty, typeof(int), x => Math.Min((int)x, 10));
             var source = new Subject<object>();
 
             target.Add(source, 0);
@@ -279,7 +285,7 @@ namespace Avalonia.Base.UnitTests
         public void Revalidate_Should_ReCoerce_Value()
         {
             var max = 10;
-            var target = new PriorityValue(null, TestProperty, typeof(int), x => Math.Min((int)x, max));
+            var target = new PriorityValue(null, TestIntProperty, typeof(int), x => Math.Min((int)x, max));
             var source = new Subject<object>();
 
             target.Add(source, 0);
