@@ -21,10 +21,13 @@ namespace Avalonia.Markup.UnitTests.Data
         {
             var data = new ExceptionTest { MustBePositive = 5 };
             var observer = new ExpressionObserver(data, nameof(data.MustBePositive), false);
-            var validationMessageFound = false;
-            ////observer.Where(o => o is IValidationStatus).Subscribe(_ => validationMessageFound = true);
+            var errorReceived = false;
+
+            observer.Where(x => x.ErrorType == BindingErrorType.DataValidationError)
+                .Subscribe(_ => errorReceived = true);
             observer.SetValue(-5);
-            Assert.True(validationMessageFound);
+
+            Assert.True(errorReceived);
         }
 
         [Fact]

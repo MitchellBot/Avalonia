@@ -14,7 +14,7 @@ namespace Avalonia.Markup.Data
     /// <summary>
     /// Observes and sets the value of an expression on an object.
     /// </summary>
-    public class ExpressionObserver : ObservableBase<object>, IDescription
+    public class ExpressionObserver : ObservableBase<BindingNotification>, IDescription
     {
         /// <summary>
         /// An ordered collection of property accessor plugins that can be used to customize
@@ -209,13 +209,13 @@ namespace Avalonia.Markup.Data
         }
 
         /// <inheritdoc/>
-        protected override IDisposable SubscribeCore(IObserver<object> observer)
+        protected override IDisposable SubscribeCore(IObserver<BindingNotification> observer)
         {
             IncrementCount();
 
             if (_node != null)
             {
-                IObservable<object> source = _node;
+                IObservable<BindingNotification> source = _node;
 
                 if (_rootObservable != null)
                 {
@@ -236,21 +236,23 @@ namespace Avalonia.Markup.Data
             }
             else if (_rootObservable != null)
             {
-                return _rootObservable.Subscribe(observer);
+                return _rootObservable
+                    .Select(x => new BindingNotification(x))
+                    .Subscribe(observer);
             }
             else
             {
                 if (_update == null)
                 {
-                    return Observable.Never<object>()
-                        .StartWith(_root.Target)
+                    return Observable.Never<BindingNotification>()
+                        .StartWith(new BindingNotification(_root.Target))
                         .Subscribe(observer);
                 }
                 else
                 {
                     return _update
-                        .Select(_ => _rootGetter())
-                        .StartWith(_rootGetter())
+                        .Select(_ => new BindingNotification(_rootGetter()))
+                        .StartWith(new BindingNotification(_rootGetter()))
                         .Subscribe(observer);
                 }
             }

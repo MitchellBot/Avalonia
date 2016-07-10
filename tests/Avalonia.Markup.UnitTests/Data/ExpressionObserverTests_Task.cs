@@ -24,7 +24,7 @@ namespace Avalonia.Markup.UnitTests.Data
                 var target = new ExpressionObserver(data, "Foo");
                 var result = new List<object>();
 
-                var sub = target.Subscribe(x => result.Add(x));
+                var sub = target.Subscribe(x => result.Add(x.Value));
                 tcs.SetResult("foo");
                 sync.ExecutePostedCallbacks();
 
@@ -41,7 +41,7 @@ namespace Avalonia.Markup.UnitTests.Data
                 var target = new ExpressionObserver(data, "Foo");
                 var result = new List<object>();
 
-                var sub = target.Subscribe(x => result.Add(x));
+                var sub = target.Subscribe(x => result.Add(x.Value));
 
                 Assert.Equal(new object[] { "foo" }, result.ToArray());
             }
@@ -57,7 +57,7 @@ namespace Avalonia.Markup.UnitTests.Data
                 var target = new ExpressionObserver(data, "Next.Foo");
                 var result = new List<object>();
 
-                var sub = target.Subscribe(x => result.Add(x));
+                var sub = target.Subscribe(x => result.Add(x.Value));
                 tcs.SetResult(new Class2("foo"));
                 sync.ExecutePostedCallbacks();
 

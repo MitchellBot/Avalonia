@@ -3,6 +3,7 @@
 
 using System;
 using System.Reactive.Linq;
+using Avalonia.Data;
 using Avalonia.Markup.Data;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "!Foo");
             var result = await target.Take(1);
 
-            Assert.Equal(false, result);
+            Assert.Equal(false, result.Value);
         }
 
         [Fact]
@@ -27,7 +28,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "!Foo");
             var result = await target.Take(1);
 
-            Assert.Equal(true, result);
+            Assert.Equal(true, result.Value);
         }
 
         [Fact]
@@ -37,7 +38,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "!Foo");
             var result = await target.Take(1);
 
-            Assert.Equal(false, result);
+            Assert.Equal(false, result.Value);
         }
 
         [Fact]
@@ -47,7 +48,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "!Foo");
             var result = await target.Take(1);
 
-            Assert.Equal(true, result);
+            Assert.Equal(true, result.Value);
         }
 
         [Fact]
@@ -57,7 +58,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "!Foo");
             var result = await target.Take(1);
 
-            Assert.Equal(false, result);
+            Assert.Equal(false, result.Value);
         }
 
         [Fact]
@@ -67,17 +68,19 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "!Foo");
             var result = await target.Take(1);
 
-            Assert.Equal(AvaloniaProperty.UnsetValue, result);
+            Assert.IsType<FormatException>(result.Error);
+            Assert.Equal(BindingErrorType.Error, result.ErrorType);
         }
 
         [Fact]
-        public async void Should_Return_Empty_For_Value_Not_Convertible_To_Boolean()
+        public async void Should_Return_Error_For_Value_Not_Convertible_To_Boolean()
         {
             var data = new { Foo = new object() };
             var target = new ExpressionObserver(data, "!Foo");
             var result = await target.Take(1);
 
-            Assert.Equal(AvaloniaProperty.UnsetValue, result);
+            Assert.IsType<InvalidCastException>(result.Error);
+            Assert.Equal(BindingErrorType.Error, result.ErrorType);
         }
 
         [Fact]

@@ -22,7 +22,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[1]");
             var result = await target.Take(1);
 
-            Assert.Equal("bar", result);
+            Assert.Equal("bar", result.Value);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[1, 1]");
             var result = await target.Take(1);
 
-            Assert.Equal("qux", result);
+            Assert.Equal("qux", result.Value);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[foo]");
             var result = await target.Take(1);
 
-            Assert.Equal("bar", result);
+            Assert.Equal("bar", result.Value);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[1.0]");
             var result = await target.Take(1);
 
-            Assert.Equal("bar", result);
+            Assert.Equal("bar", result.Value);
         }
 
         [Fact]
@@ -62,7 +62,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[2]");
             var result = await target.Take(1);
 
-            Assert.Equal(AvaloniaProperty.UnsetValue, result);
+            Assert.Equal(AvaloniaProperty.UnsetValue, result.Value);
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[1,2]");
             var result = await target.Take(1);
 
-            Assert.Equal(AvaloniaProperty.UnsetValue, result);
+            Assert.Equal(AvaloniaProperty.UnsetValue, result.Value);
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[2]");
             var result = await target.Take(1);
 
-            Assert.Equal(AvaloniaProperty.UnsetValue, result);
+            Assert.Equal(AvaloniaProperty.UnsetValue, result.Value);
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace Avalonia.Markup.UnitTests.Data
         {
             var data = new { Foo = new List<string> { "foo", "bar" } };
             var target = new ExpressionObserver(data, "Foo[1]");
-            var result = await target.Take(1);
+            var result = (await target.Take(1)).Value;
 
             Assert.Equal("bar", result);
         }
@@ -102,7 +102,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[2]");
             var result = new List<object>();
 
-            using (var sub = target.Subscribe(x => result.Add(x)))
+            using (var sub = target.Subscribe(x => result.Add(x.Value)))
             {
                 data.Foo.Add("baz");
             }
@@ -118,7 +118,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[0]");
             var result = new List<object>();
 
-            using (var sub = target.Subscribe(x => result.Add(x)))
+            using (var sub = target.Subscribe(x => result.Add(x.Value)))
             {
                 data.Foo.RemoveAt(0);
             }
@@ -134,7 +134,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[1]");
             var result = new List<object>();
 
-            using (var sub = target.Subscribe(x => result.Add(x)))
+            using (var sub = target.Subscribe(x => result.Add(x.Value)))
             {
                 data.Foo[1] = "baz";
             }
@@ -153,7 +153,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[1]");
             var result = new List<object>();
 
-            var sub = target.Subscribe(x => result.Add(x));
+            var sub = target.Subscribe(x => result.Add(x.Value));
             data.Foo.Move(0, 1);
 
             Assert.Equal(new[] { "bar", "foo" }, result);
@@ -166,7 +166,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[1]");
             var result = new List<object>();
 
-            var sub = target.Subscribe(x => result.Add(x));
+            var sub = target.Subscribe(x => result.Add(x.Value));
             data.Foo.Clear();
 
             Assert.Equal(new[] { "bar", AvaloniaProperty.UnsetValue }, result);
@@ -182,7 +182,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo[foo]");
             var result = new List<object>();
 
-            using (var sub = target.Subscribe(x => result.Add(x)))
+            using (var sub = target.Subscribe(x => result.Add(x.Value)))
             {
                 data.Foo["foo"] = "bar2";
             }

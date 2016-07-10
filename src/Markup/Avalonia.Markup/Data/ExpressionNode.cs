@@ -7,14 +7,14 @@ using Avalonia.Data;
 
 namespace Avalonia.Markup.Data
 {
-    internal abstract class ExpressionNode : IObservable<object>
+    internal abstract class ExpressionNode : IObservable<BindingNotification>
     {
         protected static readonly WeakReference UnsetReference = 
             new WeakReference(AvaloniaProperty.UnsetValue);
 
         private WeakReference _target;
 
-        private Subject<object> _subject;
+        private Subject<BindingNotification> _subject;
 
         private WeakReference _value = UnsetReference;
 
@@ -73,7 +73,7 @@ namespace Avalonia.Markup.Data
                     Next.Target = value;
                 }
 
-                _subject?.OnNext(value.Target);
+                _subject?.OnNext(new BindingNotification(value.Target));
             }
         }
 
@@ -82,7 +82,7 @@ namespace Avalonia.Markup.Data
             return Next?.SetValue(value, priority) ?? false;
         }
 
-        public virtual IDisposable Subscribe(IObserver<object> observer)
+        public virtual IDisposable Subscribe(IObserver<BindingNotification> observer)
         {
             if (Next != null)
             {
@@ -92,10 +92,10 @@ namespace Avalonia.Markup.Data
             {
                 if (_subject == null)
                 {
-                    _subject = new Subject<object>();
+                    _subject = new Subject<BindingNotification>();
                 }
 
-                observer.OnNext(CurrentValue.Target);
+                observer.OnNext(new BindingNotification(CurrentValue.Target));
                 return _subject.Subscribe(observer);
             }
         }

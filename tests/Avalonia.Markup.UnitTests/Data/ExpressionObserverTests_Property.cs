@@ -23,7 +23,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo");
             var result = await target.Take(1);
 
-            Assert.Equal("foo", result);
+            Assert.Equal("foo", result.Value);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo");
             var result = await target.Take(1);
 
-            Assert.Null(result);
+            Assert.Null(result.Value);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo");
             var result = await target.Take(1);
 
-            Assert.Equal("foo", result);
+            Assert.Equal("foo", result.Value);
         }
 
         [Fact]
@@ -62,7 +62,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo.Bar.Baz");
             var result = await target.Take(1);
 
-            Assert.Equal("baz", result);
+            Assert.Equal("baz", result.Value);
         }
 
         [Fact]
@@ -81,11 +81,9 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo.Bar.Baz");
             var result = await target.Take(1);
 
-            ////Assert.IsType<BindingError>(result);
-
-            ////var error = result as BindingError;
-            ////Assert.IsType<MissingMemberException>(error.Exception);
-            ////Assert.Equal("Could not find CLR property 'Baz' on '1'", error.Exception.Message);
+            Assert.Equal(BindingErrorType.Error, result.ErrorType);
+            Assert.IsType<MissingMemberException>(result.ErrorType);
+            Assert.Equal("Could not find CLR property 'Baz' on '1'", result.Error.Message);
         }
 
         [Fact]
@@ -104,7 +102,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Foo");
             var result = new List<object>();
 
-            var sub = target.Subscribe(x => result.Add(x));
+            var sub = target.Subscribe(x => result.Add(x.Value));
             data.Foo = "bar";
 
             Assert.Equal(new[] { "foo", "bar" }, result);
@@ -121,7 +119,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Bar");
             var result = new List<object>();
 
-            var sub = target.Subscribe(x => result.Add(x));            
+            var sub = target.Subscribe(x => result.Add(x.Value));            
 
             Assert.Equal(new[] { "foo" }, result);
 
@@ -149,7 +147,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Next.Bar");
             var result = new List<object>();
 
-            var sub = target.Subscribe(x => result.Add(x));
+            var sub = target.Subscribe(x => result.Add(x.Value));
             ((Class2)data.Next).Bar = "baz";
 
             Assert.Equal(new[] { "bar", "baz" }, result);
@@ -167,7 +165,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Next.Bar");
             var result = new List<object>();
 
-            var sub = target.Subscribe(x => result.Add(x));
+            var sub = target.Subscribe(x => result.Add(x.Value));
             var old = data.Next;
             data.Next = new Class2 { Bar = "baz" };
 
@@ -187,7 +185,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(data, "Next.Bar");
             var result = new List<object>();
 
-            var sub = target.Subscribe(x => result.Add(x));
+            var sub = target.Subscribe(x => result.Add(x.Value));
             var old = data.Next;
             data.Next = null;
             data.Next = new Class2 { Bar = "baz" };
@@ -206,7 +204,7 @@ namespace Avalonia.Markup.UnitTests.Data
         {
             var data = new Class1 { Next = new Class2 { Bar = "bar" } };
             var target = new ExpressionObserver(data, "Next.Bar");
-            var result = new List<object>();
+            var result = new List<BindingNotification>();
 
             var sub = target.Subscribe(x => result.Add(x));
             var old = data.Next;
@@ -215,9 +213,9 @@ namespace Avalonia.Markup.UnitTests.Data
             data.Next = new Class2 { Bar = "baz" };
 
             Assert.Equal(3, result.Count);
-            Assert.Equal("bar", result[0]);
-            ////Assert.IsType<BindingError>(result[1]);
-            Assert.Equal("baz", result[2]);
+            Assert.Equal("bar", result[0].Value);
+            Assert.Equal(BindingErrorType.Error, result[1].ErrorType);
+            Assert.Equal("baz", result[2].Value);
 
             sub.Dispose();
 
@@ -235,7 +233,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(() => data.Foo, "", update);
             var result = new List<object>();
 
-            target.Subscribe(x => result.Add(x));
+            target.Subscribe(x => result.Add(x.Value));
 
             data.Foo = "bar";
             update.OnNext(Unit.Default);
@@ -253,7 +251,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(source, "Foo");
             var result = new List<object>();
 
-            using (target.Subscribe(x => result.Add(x)))
+            using (target.Subscribe(x => result.Add(x.Value)))
             {
                 scheduler.Start();
             }
@@ -306,7 +304,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver((object)null, "Foo");
             var result = await target.Take(1);
 
-            Assert.Equal(AvaloniaProperty.UnsetValue, result);
+            Assert.Equal(AvaloniaProperty.UnsetValue, result.Value);
         }
 
         [Fact]
@@ -318,7 +316,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var update = new Subject<Unit>();
             var target = new ExpressionObserver(() => root, "Foo", update);
             var result = new List<object>();
-            var sub = target.Subscribe(x => result.Add(x));
+            var sub = target.Subscribe(x => result.Add(x.Value));
 
             root = second;
             update.OnNext(Unit.Default);

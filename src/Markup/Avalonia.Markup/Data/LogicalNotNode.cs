@@ -15,41 +15,30 @@ namespace Avalonia.Markup.Data
             return false;
         }
 
-        public override IDisposable Subscribe(IObserver<object> observer)
+        public override IDisposable Subscribe(IObserver<BindingNotification> observer)
         {
             return Next.Select(Negate).Subscribe(observer);
         }
 
-        private static object Negate(object v)
+        private static BindingNotification Negate(BindingNotification notification)
         {
-            if (v != AvaloniaProperty.UnsetValue)
+            if (notification.HasValue)
             {
-                var s = v as string;
-
-                if (s != null)
+                try
                 {
-                    bool result;
-
-                    if (bool.TryParse(s, out result))
-                    {
-                        return !result;
-                    }
+                    var s = notification.Value as string;
+                    var boolean = s != null ?
+                        bool.Parse(s) :
+                        Convert.ToBoolean(notification.Value, CultureInfo.InvariantCulture);
+                    return new BindingNotification(!boolean);
                 }
-                else
+                catch (Exception e)
                 {
-                    try
-                    {
-                        var boolean = Convert.ToBoolean(v, CultureInfo.InvariantCulture);
-                        return !boolean;
-                    }
-                    catch
-                    {
-                        // TODO: Maybe should log something here.
-                    }
+                    return new BindingNotification(e, BindingErrorType.Error);
                 }
             }
 
-            return AvaloniaProperty.UnsetValue;
+            return notification;
         }
     }
 }

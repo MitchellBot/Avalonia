@@ -49,7 +49,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(source, "Foo");
             var result = new List<object>();
 
-            using (target.Subscribe(x => result.Add(x)))
+            using (target.Subscribe(x => result.Add(x.Value)))
             using (target.Subscribe(_ => { }))
             {
                 scheduler.Start();
@@ -67,7 +67,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(() => new { Foo = "foo" }, "Foo", update);
             var result = new List<object>();
 
-            using (target.Subscribe(x => result.Add(x)))
+            using (target.Subscribe(x => result.Add(x.Value)))
             using (target.Subscribe(_ => { }))
             {
                 scheduler.Start();
@@ -83,7 +83,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionObserver(new { Foo = "foo" }, "Foo");
             var result = new List<object>();
 
-            using (target.Subscribe(x => result.Add(x)))
+            using (target.Subscribe(x => result.Add(x.Value)))
             using (target.Subscribe(_ => { }))
             {
                 Assert.NotNull(target.Node.Target);
