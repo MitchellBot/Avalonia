@@ -15,7 +15,7 @@ namespace Avalonia.Markup.Data
     /// Turns an <see cref="ExpressionObserver"/> into a subject that can be bound two-way with
     /// a value converter.
     /// </summary>
-    public class ExpressionSubject : ISubject<object>, IDescription
+    public class ExpressionSubject : ISubject<BindingNotification>, IDescription
     {
         private readonly ExpressionObserver _inner;
         private readonly Type _targetType;
@@ -108,106 +108,102 @@ namespace Avalonia.Markup.Data
         {
         }
 
-        /// <inheritdoc/>
         public void OnNext(object value)
         {
+            OnNext(new BindingNotification(value));
+        }
+
+        /// <inheritdoc/>
+        public void OnNext(BindingNotification notification)
+        {
+            Contract.Requires<ArgumentNullException>(notification != null);
+
             var type = _inner.ResultType;
 
-            if (type != null)
+            if (type != null && notification.HasValue)
             {
                 var converted = Converter.ConvertBack(
-                    value, 
+                    notification.Value, 
                     type, 
                     ConverterParameter, 
                     CultureInfo.CurrentUICulture);
 
-                if (converted == AvaloniaProperty.UnsetValue)
+                if (converted == BindingNotification.UnsetValue)
                 {
-                    converted = TypeUtilities.Default(type);
-                    _inner.SetValue(converted, _priority);
+                    _inner.SetValue(TypeUtilities.Default(type), _priority);
                 }
-                ////else if (converted is BindingError)
-                ////{
-                ////    var error = converted as BindingError;
+                else if (converted == null || converted.ErrorType == BindingErrorType.Error)
+                {
+                    Logger.Error(
+                        LogArea.Binding,
+                        this,
+                        "Error binding to {Expression}: {Message}",
+                        _inner.Expression,
+                        converted?.Error.Message);
 
-                ////    Logger.Error(
-                ////        LogArea.Binding,
-                ////        this,
-                ////        "Error binding to {Expression}: {Message}",
-                ////        _inner.Expression,
-                ////        error.Exception.Message);
+                    object fallback;
 
-                ////    if (_fallbackValue != AvaloniaProperty.UnsetValue)
-                ////    {
-                ////        if (TypeUtilities.TryConvert(
-                ////            type, 
-                ////            _fallbackValue, 
-                ////            CultureInfo.InvariantCulture, 
-                ////            out converted))
-                ////        {
-                ////            _inner.SetValue(converted, _priority);
-                ////        }
-                ////        else
-                ////        {
-                ////            Logger.Error(
-                ////                LogArea.Binding,
-                ////                this,
-                ////                "Could not convert FallbackValue {FallbackValue} to {Type}",
-                ////                _fallbackValue,
-                ////                type);
-                ////        }
-                ////    }
-                ////}
+                    if (_fallbackValue != AvaloniaProperty.UnsetValue)
+                    {
+                        if (TypeUtilities.TryConvert(
+                            type,
+                            _fallbackValue,
+                            CultureInfo.InvariantCulture,
+                            out fallback))
+                        {
+                            _inner.SetValue(fallback, _priority);
+                        }
+                        else
+                        {
+                            Logger.Error(
+                                LogArea.Binding,
+                                this,
+                                "Could not convert FallbackValue {FallbackValue} to {Type}",
+                                _fallbackValue,
+                                type);
+                        }
+                    }
+                }
                 else
                 {
-                    _inner.SetValue(converted, _priority);
+                    _inner.SetValue(converted.Value, _priority);
                 }
             }
         }
 
         /// <inheritdoc/>
-        public IDisposable Subscribe(IObserver<object> observer)
+        public IDisposable Subscribe(IObserver<BindingNotification> observer)
         {
             return _inner.Select(ConvertValue).Subscribe(observer);
         }
 
-        private object ConvertValue(object value)
+        private BindingNotification ConvertValue(BindingNotification notification)
         {
-            var converted = 
-                ////value as BindingError ??
-                ////value as IValidationStatus ??
-                Converter.Convert(
-                    value,
+            if (notification.HasValue)
+            {
+                var converted = Converter.Convert(
+                    notification.Value,
                     _targetType,
                     ConverterParameter,
                     CultureInfo.CurrentUICulture);
 
-            ////if (_fallbackValue != AvaloniaProperty.UnsetValue &&
-            ////    (converted == AvaloniaProperty.UnsetValue ||
-            ////     converted is BindingError))
-            ////{
-            ////    var error = converted as BindingError;
-                
-            ////    if (TypeUtilities.TryConvert(
-            ////        _targetType, 
-            ////        _fallbackValue,
-            ////        CultureInfo.InvariantCulture,
-            ////        out converted))
-            ////    {
-            ////        if (error != null)
-            ////        {
-            ////            converted = new BindingError(error.Exception, converted);
-            ////        }
-            ////    }
-            ////    else
-            ////    {
-            ////        converted = new BindingError(
-            ////            new InvalidCastException(
-            ////                $"Could not convert FallbackValue '{_fallbackValue}' to '{_targetType}'"));
-            ////    }
-            ////}
+                if (converted == null ||
+                    (converted.ErrorType != BindingErrorType.None &&
+                     _fallbackValue != AvaloniaProperty.UnsetValue))
+                {
+                    converted = Converter.Convert(
+                        _fallbackValue,
+                        _targetType,
+                        null,
+                        CultureInfo.CurrentUICulture);
+                }
 
-            return converted;
+                return converted?.WithError(notification.Error) ?? notification;
+            }
+            else
+            {
+                return notification;
+            }
         }
     }
 }

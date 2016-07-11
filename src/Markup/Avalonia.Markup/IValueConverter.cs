@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Avalonia.Data;
 
 namespace Avalonia.Markup
 {
@@ -18,13 +19,20 @@ namespace Avalonia.Markup
         /// <param name="targetType">The type of the target.</param>
         /// <param name="parameter">A user-defined parameter.</param>
         /// <param name="culture">The culture to use.</param>
-        /// <returns>The converted value.</returns>
+        /// <returns>
+        /// A <see cref="BindingNotification"/> describing the converted value or any error that
+        /// occurred in converting the value.
+        /// </returns>
         /// <remarks>
         /// This method should not throw exceptions. If the value is not convertible, return
-        /// <see cref="AvaloniaProperty.UnsetValue"/>. Any exception thrown will be treated as
-        /// an application exception.
+        /// a <see cref="BindingNotification"/> with an exception. Any exception thrown will
+        /// be treated as an application exception.
         /// </remarks>
-        object Convert(object value, Type targetType, object parameter, CultureInfo culture);
+        BindingNotification Convert(
+            object value,
+            Type targetType,
+            object parameter,
+            CultureInfo culture);
 
         /// <summary>
         /// Converts a value.
@@ -34,11 +42,19 @@ namespace Avalonia.Markup
         /// <param name="parameter">A user-defined parameter.</param>
         /// <param name="culture">The culture to use.</param>
         /// <returns>The converted value.</returns>
+        /// <returns>
+        /// A <see cref="BindingNotification"/> describing the converted value or any error that
+        /// occurred in converting the value.
+        /// </returns>
         /// <remarks>
         /// This method should not throw exceptions. If the value is not convertible, return
-        /// <see cref="AvaloniaProperty.UnsetValue"/>. Any exception thrown will be treated as
-        /// an application exception.
+        /// a <see cref="BindingNotification"/> with an exception. Any exception thrown will
+        /// be treated as an application exception.
         /// </remarks>
-        object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture);
+        BindingNotification ConvertBack(
+            object value,
+            Type targetType,
+            object parameter,
+            CultureInfo culture);
     }
 }

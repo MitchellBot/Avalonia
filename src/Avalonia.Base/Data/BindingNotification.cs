@@ -33,6 +33,18 @@ namespace Avalonia.Data
     public class BindingNotification
     {
         /// <summary>
+        /// A binding notification representing the null value.
+        /// </summary>
+        public static readonly BindingNotification Null =
+            new BindingNotification(null);
+
+        /// <summary>
+        /// A binding notification representing <see cref="AvaloniaProperty.UnsetValue"/>.
+        /// </summary>
+        public static readonly BindingNotification UnsetValue =
+            new BindingNotification(AvaloniaProperty.UnsetValue);
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="BindingNotification"/> class.
         /// </summary>
         /// <param name="value">The binding value.</param>
@@ -91,5 +103,65 @@ namespace Avalonia.Data
         /// Gets the type of error that <see cref="Error"/> represents, if any.
         /// </summary>
         public BindingErrorType ErrorType { get; }
+
+        public static bool operator ==(BindingNotification a, BindingNotification b)
+        {
+            if (object.ReferenceEquals(a, b))
+            {
+                return true;
+            }
+            
+            if ((object)a == null || (object)b == null)
+            {
+                return false;
+            }
+
+            return a.HasValue == b.HasValue &&
+                   a.ErrorType == b.ErrorType &&
+                   (!a.HasValue || object.Equals(a.Value, b.Value)) &&
+                   (a.ErrorType == BindingErrorType.None || object.Equals(a.Error, b.Error));
+        }
+
+        public static bool operator !=(BindingNotification a, BindingNotification b)
+        {
+            return !(a == b);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as BindingNotification);
+        }
+
+        public bool Equals(BindingNotification other)
+        {
+            return this == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public BindingNotification WithError(Exception e)
+        {
+            if (e == null)
+            {
+                return this;
+            }
+
+            if (Error != null)
+            {
+                e = new AggregateException(Error, e);
+            }
+
+            if (HasValue)
+            {
+                return new BindingNotification(e, BindingErrorType.Error, Value);
+            }
+            else
+            {
+                return new BindingNotification(e, BindingErrorType.Error, Value);
+            }
+        }
     }
 }

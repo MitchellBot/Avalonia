@@ -68,9 +68,9 @@
     <Compile Include="FuncValueConverter.cs" />
     <Compile Include="IMultiValueConverter.cs" />
     <Compile Include="BoolConverters.cs" />
+    <Compile Include="IValueConverter.cs" />
     <Compile Include="StringConverters.cs" />
     <Compile Include="DefaultValueConverter.cs" />
-    <Compile Include="IValueConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

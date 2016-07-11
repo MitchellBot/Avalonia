@@ -22,7 +22,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionSubject(new ExpressionObserver(data, "StringValue"), typeof(string));
             var result = await target.Take(1);
 
-            Assert.Equal("foo", result);
+            Assert.Equal("foo", result.Value);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var data = new Class1 { StringValue = "foo" };
             var target = new ExpressionSubject(new ExpressionObserver(data, "StringValue"), typeof(string));
 
-            target.OnNext("bar");
+            target.OnNext(new BindingNotification("bar"));
 
             Assert.Equal("bar", data.StringValue);
         }
@@ -45,27 +45,27 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionSubject(new ExpressionObserver(data, "StringValue"), typeof(double));
             var result = await target.Take(1);
 
-            Assert.Equal(5.6, result);
+            Assert.Equal(5.6, result.Value);
         }
 
         [Fact]
-        public async void Getting_Invalid_Double_String_Should_Return_BindingError()
+        public async void Getting_Invalid_Double_String_Should_Return_Binding_Error()
         {
             var data = new Class1 { StringValue = "foo" };
             var target = new ExpressionSubject(new ExpressionObserver(data, "StringValue"), typeof(double));
             var result = await target.Take(1);
 
-            ////Assert.IsType<BindingError>(result);
+            Assert.Equal(BindingErrorType.Error, result.ErrorType);
         }
 
         [Fact]
-        public async void Should_Coerce_Get_Null_Double_String_To_UnsetValue()
+        public async void Getting_Null_Double_String_Should_Return_Binding_Error()
         {
             var data = new Class1 { StringValue = null };
             var target = new ExpressionSubject(new ExpressionObserver(data, "StringValue"), typeof(double));
             var result = await target.Take(1);
 
-            Assert.Equal(AvaloniaProperty.UnsetValue, result);
+            Assert.Equal(BindingErrorType.Error, result.ErrorType);
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace Avalonia.Markup.UnitTests.Data
             var target = new ExpressionSubject(new ExpressionObserver(data, "DoubleValue"), typeof(string));
             var result = await target.Take(1);
 
-            Assert.Equal((5.6).ToString(), result);
+            Assert.Equal((5.6).ToString(), result.Value);
         }
 
         [Fact]
@@ -133,14 +133,14 @@ namespace Avalonia.Markup.UnitTests.Data
         }
 
         [Fact]
-        public void Should_Coerce_Setting_Null_Double_To_Default_Value()
+        public void Setting_Double_To_Null_Without_Fallback_Should_Be_Ignored()
         {
             var data = new Class1 { DoubleValue = 5.6 };
             var target = new ExpressionSubject(new ExpressionObserver(data, "DoubleValue"), typeof(string));
 
-            target.OnNext(null);
+            target.OnNext(BindingNotification.Null);
 
-            Assert.Equal(0, data.DoubleValue);
+            Assert.Equal(5.6, data.DoubleValue);
         }
 
         [Fact]

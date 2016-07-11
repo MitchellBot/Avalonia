@@ -22,15 +22,8 @@ namespace Avalonia.Markup
         /// </summary>
         public static readonly DefaultValueConverter Instance = new DefaultValueConverter();
 
-        /// <summary>
-        /// Converts a value.
-        /// </summary>
-        /// <param name="value">The value to convert.</param>
-        /// <param name="targetType">The type of the target.</param>
-        /// <param name="parameter">A user-defined parameter.</param>
-        /// <param name="culture">The culture to use.</param>
-        /// <returns>The converted value.</returns>
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        /// <inheritdoc/>
+        public BindingNotification Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             object result;
 
@@ -38,27 +31,21 @@ namespace Avalonia.Markup
                 (TypeUtilities.TryConvert(targetType, value, culture, out result) ||
                  TryConvertEnum(value, targetType, culture, out result)))
             {
-                return result;
+                return new BindingNotification(result);
             }
 
-            ////if (value != null)
-            ////{
-            ////    var message = $"Could not convert '{value}' to '{targetType}'";
-            ////    return new BindingError(new InvalidCastException(message));
-            ////}
+            if (value != null || !TypeUtilities.AcceptsNull(targetType))
+            {
+                value = value ?? "(null)";
+                var message = $"Could not convert '{value} ' to '{targetType}'";
+                return new BindingNotification(new InvalidCastException(message), BindingErrorType.Error);
+            }
 
-            return AvaloniaProperty.UnsetValue;
+            return BindingNotification.Null;
         }
 
-        /// <summary>
-        /// Converts a value.
-        /// </summary>
-        /// <param name="value">The value to convert.</param>
-        /// <param name="targetType">The type of the target.</param>
-        /// <param name="parameter">A user-defined parameter.</param>
-        /// <param name="culture">The culture to use.</param>
-        /// <returns>The converted value.</returns>
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        /// <inheritdoc/>
+        public BindingNotification ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return Convert(value, targetType, parameter, culture);
         }

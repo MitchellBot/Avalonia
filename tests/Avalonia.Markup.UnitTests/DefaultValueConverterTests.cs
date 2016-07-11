@@ -19,7 +19,7 @@ namespace Avalonia.Markup.UnitTests
                 null, 
                 CultureInfo.InvariantCulture);
 
-            Assert.Equal(5, result);
+            Assert.Equal(5, result.Value);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Avalonia.Markup.UnitTests
                 null,
                 CultureInfo.InvariantCulture);
 
-            Assert.Equal(5.0, result);
+            Assert.Equal(5.0, result.Value);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Avalonia.Markup.UnitTests
                 null,
                 CultureInfo.InvariantCulture);
 
-            Assert.Equal(TestEnum.Bar, result);
+            Assert.Equal(TestEnum.Bar, result.Value);
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace Avalonia.Markup.UnitTests
                 null,
                 CultureInfo.InvariantCulture);
 
-            Assert.Equal(TestEnum.Bar, result);
+            Assert.Equal(TestEnum.Bar, result.Value);
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Avalonia.Markup.UnitTests
                 null,
                 CultureInfo.InvariantCulture);
 
-            Assert.Equal("5", result);
+            Assert.Equal("5", result.Value);
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace Avalonia.Markup.UnitTests
                 null,
                 CultureInfo.InvariantCulture);
 
-            Assert.Equal(1, result);
+            Assert.Equal(1, result.Value);
         }
 
         [Fact]
@@ -91,7 +91,7 @@ namespace Avalonia.Markup.UnitTests
                 null,
                 CultureInfo.InvariantCulture);
 
-            Assert.Equal("Bar", result);
+            Assert.Equal("Bar", result.Value);
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace Avalonia.Markup.UnitTests
                 null,
                 CultureInfo.InvariantCulture);
 
-            Assert.Equal(5.0, result);
+            Assert.Equal(5.0, result.Value);
         }
 
         [Fact]
@@ -115,7 +115,7 @@ namespace Avalonia.Markup.UnitTests
                 null,
                 CultureInfo.InvariantCulture);
 
-            ////Assert.IsType<BindingError>(result);
+            Assert.Equal(BindingErrorType.Error, result.ErrorType);
         }
 
         private enum TestEnum

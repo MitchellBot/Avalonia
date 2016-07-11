@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Avalonia.Data;
 using Avalonia.Utilities;
 
 namespace Avalonia.Markup
@@ -27,20 +28,27 @@ namespace Avalonia.Markup
         }
 
         /// <inheritdoc/>
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public BindingNotification Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is TIn || (value == null && TypeUtilities.AcceptsNull(typeof(TIn))))
             {
-                return _convert((TIn)value);
+                try
+                {
+                    return new BindingNotification(_convert((TIn)value));
+                }
+                catch (Exception e)
+                {
+                    return new BindingNotification(e, BindingErrorType.Error);
+                }
             }
             else
             {
-                return AvaloniaProperty.UnsetValue;
+                return BindingNotification.UnsetValue;
             }
         }
 
         /// <inheritdoc/>
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public BindingNotification ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
