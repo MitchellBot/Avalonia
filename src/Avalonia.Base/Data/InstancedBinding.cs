@@ -54,7 +54,7 @@ namespace Avalonia.Data
             if (mode == BindingMode.OneWayToSource || mode == BindingMode.TwoWay)
             {
                 throw new ArgumentException(
-                    "Invalid BindingResult mode: OneWayToSource and TwoWay bindings" +
+                    "Invalid BindingResult mode: OneWayToSource and TwoWay bindings " +
                     "require a Subject.");
             }
 
