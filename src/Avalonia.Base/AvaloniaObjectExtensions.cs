@@ -16,6 +16,11 @@ namespace Avalonia
     /// </summary>
     public static class AvaloniaObjectExtensions
     {
+        public static IBinding AsBinding<T>(this IObservable<T> source)
+        {
+            return new BindingAdaptor(source.Select(x => (object)x));
+        }
+
         /// <summary>
         /// Gets an observable for a <see cref="AvaloniaProperty"/>.
         /// </summary>
@@ -313,6 +318,24 @@ namespace Avalonia
             if (target != null)
             {
                 handler(target)(e);
+            }
+        }
+
+        private class BindingAdaptor : IBinding
+        {
+            private IObservable<object> _source;
+
+            public BindingAdaptor(IObservable<object> source)
+            {
+                this._source = source;
+            }
+
+            public InstancedBinding Initiate(
+                IAvaloniaObject target,
+                AvaloniaProperty targetProperty,
+                object anchor = null)
+            {
+                return new InstancedBinding(_source);
             }
         }
     }
