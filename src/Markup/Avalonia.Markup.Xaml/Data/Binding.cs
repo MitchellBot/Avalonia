@@ -143,7 +143,7 @@ namespace Avalonia.Markup.Xaml.Data
                 ConverterParameter,
                 Priority);
 
-            return new InstancedBinding(subject, Mode, Priority);
+            return InstancedBinding.FromSubject(subject, Mode, Priority);
         }
 
         private static PathInfo ParsePath(string path)

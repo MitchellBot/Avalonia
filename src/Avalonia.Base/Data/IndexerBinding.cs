@@ -29,11 +29,11 @@ namespace Avalonia.Data
 
             if (mode == BindingMode.TwoWay)
             {
-                return new InstancedBinding(Source.GetSubject(Property), mode);
+                return InstancedBinding.FromSubject(Source.GetSubject(Property), mode);
             }
             else
             {
-                return new InstancedBinding(Source.GetObservable(Property), mode);
+                return InstancedBinding.FromObservable(Source.GetObservable(Property), mode);
             }
         }
     }

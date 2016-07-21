@@ -63,9 +63,11 @@ namespace Avalonia.Markup.Xaml.Data
             var targetType = targetProperty?.PropertyType ?? typeof(object);
             var result = new BehaviorSubject<object>(AvaloniaProperty.UnsetValue);
             var children = Bindings.Select(x => x.Initiate(target, null));
-            var input = children.Select(x => x.Subject).CombineLatest().Select(x => ConvertValue(x, targetType));
+            var input = children.Select(x => x.NotificationSubject)
+                .CombineLatest()
+                .Select(x => ConvertValue(x, targetType));
             input.Subscribe(result);
-            return new InstancedBinding(result, Mode, Priority);
+            return InstancedBinding.FromSubject(result, Mode, Priority);
         }
 
         /// <summary>
@@ -99,8 +101,13 @@ namespace Avalonia.Markup.Xaml.Data
             }
         }
 
-        private object ConvertValue(IList<object> values, Type targetType)
+        private object ConvertValue(IList<BindingNotification> notifications, Type targetType)
         {
+            var values = notifications
+                .Where(x => x.ErrorType == BindingErrorType.None)
+                .Select(x => x.Value)
+                .ToList();
+
             var converted = Converter.Convert(values, targetType, null, CultureInfo.CurrentUICulture);
 
             if (converted == AvaloniaProperty.UnsetValue && FallbackValue != null)

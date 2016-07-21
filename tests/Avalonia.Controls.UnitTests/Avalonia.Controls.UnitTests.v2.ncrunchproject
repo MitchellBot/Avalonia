@@ -23,5 +23,5 @@
   <UseCPUArchitecture>AutoDetect</UseCPUArchitecture>
   <MSTestThreadApartmentState>STA</MSTestThreadApartmentState>
   <BuildProcessArchitecture>x86</BuildProcessArchitecture>
-  <HiddenWarnings>LongTestTimesWithoutParallelExecution</HiddenWarnings>
+  <HiddenWarnings>LongTestTimesWithoutParallelExecution;AbnormalReferenceResolution</HiddenWarnings>
 </ProjectConfiguration>

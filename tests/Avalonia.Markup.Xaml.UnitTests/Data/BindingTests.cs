@@ -190,7 +190,7 @@ namespace Avalonia.Markup.Xaml.UnitTests.Data
                 Path = "Foo",
             };
 
-            var result = binding.Initiate(target, TextBox.TextProperty).Subject;
+            var result = binding.Initiate(target, TextBox.TextProperty).NotificationSubject;
 
             Assert.IsType<DefaultValueConverter>(((ExpressionSubject)result).Converter);
         }
@@ -206,7 +206,7 @@ namespace Avalonia.Markup.Xaml.UnitTests.Data
                 Path = "Foo",
             };
 
-            var result = binding.Initiate(target, TextBox.TextProperty).Subject;
+            var result = binding.Initiate(target, TextBox.TextProperty).NotificationSubject;
 
             Assert.Same(converter.Object, ((ExpressionSubject)result).Converter);
         }
@@ -223,7 +223,7 @@ namespace Avalonia.Markup.Xaml.UnitTests.Data
                 Path = "Bar",
             };
 
-            var result = binding.Initiate(target, TextBox.TextProperty).Subject;
+            var result = binding.Initiate(target, TextBox.TextProperty).NotificationSubject;
 
             Assert.Same("foo", ((ExpressionSubject)result).ConverterParameter);
         }

@@ -34,6 +34,9 @@ namespace Avalonia.Data
             Contract.Requires<ArgumentNullException>(binding != null);
 
             var mode = binding.Mode;
+            var notifications =
+                binding.SourceType == BindingSourceType.NotificationObservable ||
+                binding.SourceType == BindingSourceType.NotificationSubject;
 
             if (mode == BindingMode.Default)
             {
@@ -44,17 +47,48 @@ namespace Avalonia.Data
             {
                 case BindingMode.Default:
                 case BindingMode.OneWay:
-                    return target.Bind(property, binding.Observable ?? binding.Subject, binding.Priority);
-                case BindingMode.TwoWay:
-                    return new CompositeDisposable(
-                        target.Bind(property, binding.Subject, binding.Priority),
-                        target.GetObservable(property).Subscribe(binding.Subject));
-                case BindingMode.OneTime:
-                    var source = binding.Subject ?? binding.Observable;
-
-                    if (source != null)
+                    if (!notifications)
                     {
-                        return source.Take(1).Subscribe(x => target.SetValue(property, x, binding.Priority));
+                        return target.Bind(property, binding.Observable, binding.Priority);
+                    }
+                    else
+                    {
+                        return target.Bind(property, binding.NotificationObservable, binding.Priority);
+                    }
+
+                case BindingMode.TwoWay:
+                    if (!notifications)
+                    {
+                        return new CompositeDisposable(
+                            target.Bind(property, binding.Subject, binding.Priority),
+                            target.GetObservable(property).Subscribe(binding.Subject));
+                    }
+                    else
+                    {
+                        var a = target.Bind(property, binding.NotificationSubject, binding.Priority);
+                        var b = target.GetObservable(property)
+                                  .Select(x => new BindingNotification(x))
+                                  .Subscribe(binding.NotificationSubject);
+                        return new CompositeDisposable(
+                            target.Bind(property, binding.NotificationSubject, binding.Priority),
+                            target.GetObservable(property)
+                                  .Select(x => new BindingNotification(x))
+                                  .Subscribe(binding.NotificationSubject));
+                    }
+
+                case BindingMode.OneTime:
+                    if (binding.NotificationObservable != null)
+                    {
+                        return binding.NotificationObservable
+                            .Where(x => x.ErrorType == BindingErrorType.None)
+                            .Take(1)
+                            .Subscribe(x => target.SetValue(property, x.Value, binding.Priority));
+                    }
+                    else if (binding.Observable != null)
+                    {
+                        return binding.Observable
+                            .Take(1)
+                            .Subscribe(x => target.SetValue(property, x, binding.Priority));
                     }
                     else
                     {
@@ -62,7 +96,17 @@ namespace Avalonia.Data
                         return Disposable.Empty;
                     }
                 case BindingMode.OneWayToSource:
-                    return target.GetObservable(property).Subscribe(binding.Subject);
+                    if (!notifications)
+                    {
+                        return target.GetObservable(property).Subscribe(binding.Subject);
+                    }
+                    else
+                    {
+                        return target.GetObservable(property)
+                            .Select(x => new BindingNotification(x))
+                            .Subscribe(binding.NotificationSubject);
+                    }
+
                 default:
                     throw new ArgumentException("Invalid binding mode.");
             }

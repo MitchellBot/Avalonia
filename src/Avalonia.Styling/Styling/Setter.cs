@@ -141,32 +141,32 @@ namespace Avalonia.Styling
                 if (sourceInstance.Subject != null)
                 {
                     var activated = new ActivatedSubject(activator, sourceInstance.Subject, description);
-                    cloned = new InstancedBinding(activated, sourceInstance.Mode, BindingPriority.StyleTrigger);
+                    cloned = InstancedBinding.FromSubject(activated, sourceInstance.Mode, BindingPriority.StyleTrigger);
                 }
                 else if (sourceInstance.Observable != null)
                 {
                     var activated = new ActivatedObservable(activator, sourceInstance.Observable, description);
-                    cloned = new InstancedBinding(activated, sourceInstance.Mode, BindingPriority.StyleTrigger);
+                    cloned = InstancedBinding.FromObservable(activated, sourceInstance.Mode, BindingPriority.StyleTrigger);
                 }
                 else
                 {
                     var activated = new ActivatedValue(activator, sourceInstance.Value, description);
-                    cloned = new InstancedBinding(activated, BindingMode.OneWay, BindingPriority.StyleTrigger);
+                    cloned = InstancedBinding.FromObservable(activated, BindingMode.OneWay, BindingPriority.StyleTrigger);
                 }
             }
             else
             {
                 if (sourceInstance.Subject != null)
                 {
-                    cloned = new InstancedBinding(sourceInstance.Subject, sourceInstance.Mode, BindingPriority.Style);
+                    cloned = InstancedBinding.FromSubject(sourceInstance.Subject, sourceInstance.Mode, BindingPriority.Style);
                 }
                 else if (sourceInstance.Observable != null)
                 {
-                    cloned = new InstancedBinding(sourceInstance.Observable, sourceInstance.Mode, BindingPriority.Style);
+                    cloned = InstancedBinding.FromObservable(sourceInstance.Observable, sourceInstance.Mode, BindingPriority.Style);
                 }
                 else
                 {
-                    cloned = new InstancedBinding(sourceInstance.Value, BindingPriority.Style);
+                    cloned = InstancedBinding.FromValue(sourceInstance.Value, BindingPriority.Style);
                 }
             }
 

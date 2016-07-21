@@ -6,6 +6,15 @@ using System.Reactive.Subjects;
 
 namespace Avalonia.Data
 {
+    public enum BindingSourceType
+    {
+        Value,
+        Observable,
+        Subject,
+        NotificationObservable,
+        NotificationSubject,
+    }
+
     /// <summary>
     /// Holds the result of calling <see cref="IBinding.Initiate"/>.
     /// </summary>
@@ -23,63 +32,58 @@ namespace Avalonia.Data
     /// </remarks>
     public class InstancedBinding
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InstancedBinding"/> class.
-        /// </summary>
-        /// <param name="value">
-        /// The value used for the <see cref="BindingMode.OneTime"/> binding.
-        /// </param>
-        /// <param name="priority">The binding priority.</param>
-        public InstancedBinding(object value,
+        public static InstancedBinding FromValue(
+            object value,
             BindingPriority priority = BindingPriority.LocalValue)
         {
-            Mode = BindingMode.OneTime;
-            Priority = priority;
+            return new InstancedBinding(BindingSourceType.Value, value, BindingMode.OneTime, priority);
+        }
+
+        public static InstancedBinding FromObservable(
+            IObservable<object> source,
+            BindingMode mode = BindingMode.OneWay,
+            BindingPriority priority = BindingPriority.LocalValue)
+        {
+            return new InstancedBinding(BindingSourceType.Observable, source, mode, priority);
+        }
+
+        public static InstancedBinding FromObservable(
+            IObservable<BindingNotification> source,
+            BindingMode mode = BindingMode.OneWay,
+            BindingPriority priority = BindingPriority.LocalValue)
+        {
+            return new InstancedBinding(BindingSourceType.NotificationObservable, source, mode, priority);
+        }
+
+        public static InstancedBinding FromSubject(
+            ISubject<object> source,
+            BindingMode mode = BindingMode.OneWay,
+            BindingPriority priority = BindingPriority.LocalValue)
+        {
+            return new InstancedBinding(BindingSourceType.Subject, source, mode, priority);
+        }
+
+        public static InstancedBinding FromSubject(
+            ISubject<BindingNotification> source,
+            BindingMode mode = BindingMode.OneWay,
+            BindingPriority priority = BindingPriority.LocalValue)
+        {
+            return new InstancedBinding(BindingSourceType.NotificationSubject, source, mode, priority);
+        }
+
+        protected InstancedBinding(
+            BindingSourceType sourceType,
+            object value,
+            BindingMode mode,
+            BindingPriority priority)
+        {
+            SourceType = sourceType;
             Value = value;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InstancedBinding"/> class.
-        /// </summary>
-        /// <param name="observable">The observable for a one-way binding.</param>
-        /// <param name="mode">The binding mode.</param>
-        /// <param name="priority">The binding priority.</param>
-        public InstancedBinding(
-            IObservable<object> observable, 
-            BindingMode mode = BindingMode.OneWay,
-            BindingPriority priority = BindingPriority.LocalValue)
-        {
-            Contract.Requires<ArgumentNullException>(observable != null);
-
-            if (mode == BindingMode.OneWayToSource || mode == BindingMode.TwoWay)
-            {
-                throw new ArgumentException(
-                    "Invalid BindingResult mode: OneWayToSource and TwoWay bindings " +
-                    "require a Subject.");
-            }
-
             Mode = mode;
             Priority = priority;
-            Observable = observable;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InstancedBinding"/> class.
-        /// </summary>
-        /// <param name="subject">The subject for a two-way binding.</param>
-        /// <param name="mode">The binding mode.</param>
-        /// <param name="priority">The binding priority.</param>
-        public InstancedBinding(
-            ISubject<object> subject,
-            BindingMode mode = BindingMode.OneWay,
-            BindingPriority priority = BindingPriority.LocalValue)
-        {
-            Contract.Requires<ArgumentNullException>(subject != null);
-
-            Mode = mode;
-            Priority = priority;
-            Subject = subject;
-        }
+        public BindingSourceType SourceType { get; }
 
         /// <summary>
         /// Gets the binding mode with which the binding was initiated.
@@ -91,19 +95,20 @@ namespace Avalonia.Data
         /// </summary>
         public BindingPriority Priority { get; }
 
-        /// <summary>
-        /// Gets the value used for a <see cref="BindingMode.OneTime"/> binding.
-        /// </summary>
         public object Value { get; }
+
+        public IObservable<object> Observable => Value as IObservable<object>;
 
         /// <summary>
         /// Gets the observable for a one-way binding.
         /// </summary>
-        public IObservable<object> Observable { get; }
+        public IObservable<BindingNotification> NotificationObservable => Value as IObservable<BindingNotification>;
 
         /// <summary>
         /// Gets the subject for a two-way binding.
         /// </summary>
-        public ISubject<object> Subject { get; }
+        public ISubject<object> Subject => Value as ISubject<object>;
+
+        public ISubject<BindingNotification> NotificationSubject => Value as ISubject<BindingNotification>;
     }
 }

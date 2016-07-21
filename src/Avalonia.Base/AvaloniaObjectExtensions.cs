@@ -335,7 +335,7 @@ namespace Avalonia
                 AvaloniaProperty targetProperty,
                 object anchor = null)
             {
-                return new InstancedBinding(_source);
+                return InstancedBinding.FromObservable(_source);
             }
         }
     }
