@@ -30,7 +30,7 @@ namespace Avalonia.Data
     /// Represents a binding notification that can be a valid binding value, or a binding or
     /// data validation error.
     /// </summary>
-    public class BindingNotification : IValidationStatus
+    public class BindingNotification
     {
         /// <summary>
         /// A binding notification representing the null value.
@@ -103,8 +103,6 @@ namespace Avalonia.Data
         /// Gets the type of error that <see cref="Error"/> represents, if any.
         /// </summary>
         public BindingErrorType ErrorType { get; }
-
-        bool IValidationStatus.IsValid => ErrorType == BindingErrorType.None;
 
         public static bool operator ==(BindingNotification a, BindingNotification b)
         {

@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Data;
+using Avalonia.Logging;
 using Avalonia.Markup.Data.Plugins;
 
 namespace Avalonia.Markup.Data
@@ -39,7 +40,7 @@ namespace Avalonia.Markup.Data
             {
                 if (_accessor != null)
                 {
-                    return _accessor.SetValue(value, priority);
+                    try { return _accessor.SetValue(value, priority); } catch { }
                 }
 
                 return false;
@@ -52,32 +53,20 @@ namespace Avalonia.Markup.Data
 
             if (instance != null && instance != AvaloniaProperty.UnsetValue)
             {
-                var accessorPlugin = ExpressionObserver.PropertyAccessors.FirstOrDefault(x => x.Match(reference));
+                var plugin = ExpressionObserver.PropertyAccessors.FirstOrDefault(x => x.Match(reference));
+                var accessor = plugin?.Start(reference, PropertyName, SetCurrentValue);
 
-                if (accessorPlugin != null)
+                if (_enableValidation)
                 {
-                    _accessor = ExceptionValidationPlugin.Instance.Start(
-                        reference,
-                        PropertyName,
-                        accessorPlugin.Start(reference, PropertyName, SetCurrentValue),
-                        SendValidationStatus);
 
-                    if (_enableValidation)
-                    {
-                        foreach (var validationPlugin in ExpressionObserver.ValidationCheckers)
-                        {
-                            if (validationPlugin.Match(reference))
-                            {
-                                _accessor = validationPlugin.Start(reference, PropertyName, _accessor, SendValidationStatus);
-                            }
-                        }
-                    }
+                }
 
-                    if (_accessor != null)
-                    {
-                        SetCurrentValue(_accessor.Value);
-                        return;
-                    }
+                _accessor = accessor;
+
+                if (_accessor != null)
+                {
+                    SetCurrentValue(_accessor.Value);
+                    return;
                 }
             }
 

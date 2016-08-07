@@ -31,8 +31,8 @@ namespace Avalonia.Markup.Data
         /// An ordered collection of validation checker plugins that can be used to customize
         /// the validation of view model and model data.
         /// </summary>
-        public static readonly IList<IValidationPlugin> ValidationCheckers =
-            new List<IValidationPlugin>
+        public static readonly IList<IDataValidationPlugin> ValidationCheckers =
+            new List<IDataValidationPlugin>
             {
                 new IndeiValidationPlugin(),
             };
